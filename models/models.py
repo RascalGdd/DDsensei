@@ -59,7 +59,7 @@ class Unpaired_model(nn.Module):
             elif opt.netDu == 'wavelet_decoder_red':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
                 self.wavelet_decoder = discriminators.Wavelet_decoder_new(opt)
-            if opt.netDu == 'wavelet_decoder_blue':
+            elif opt.netDu == 'wavelet_decoder_blue':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
                 self.wavelet_decoder = discriminators.Wavelet_decoder_new()
                 self.wavelet_decoder2 = discriminators.BluePart()
@@ -736,6 +736,7 @@ def preprocess_input(opt, data):
     if opt.gpu_ids != "-1":
         data['label'] = data['label'].cuda()
         data['image'] = data['image'].cuda()
+        data['image2'] = data['image2'].cuda()
     label_map = data['label']
     bs, _, h, w = label_map.size()
     nc = opt.semantic_nc
@@ -744,7 +745,7 @@ def preprocess_input(opt, data):
     else:
         input_label = torch.FloatTensor(bs, nc, h, w).zero_()
     input_semantics = input_label.scatter_(1, label_map, 1.0)
-    return data['image'], input_semantics
+    return data['image'],data['image2'], input_semantics
 
 
 def generate_labelmix(label, fake_image, real_image):
