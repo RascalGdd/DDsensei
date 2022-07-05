@@ -49,7 +49,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             continue
         already_started = True
         cur_iter = epoch*len(dataloader) + i
-        image, image2, label = models.preprocess_input(opt, data_i)
+        image, image2, label = models.preprocess_input2(opt, data_i)
 
         #--- generator unconditional update ---#
         model.module.netG.zero_grad()
