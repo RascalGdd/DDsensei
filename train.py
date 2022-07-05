@@ -16,7 +16,7 @@ print("nb of gpus: ", torch.cuda.device_count())
 timer = utils.timer(opt)
 visualizer_losses = utils.losses_saver(opt)
 losses_computer = losses.losses_computer(opt)
-dataloader,dataloader_supervised, dataloader_val, dataloader2 = dataloaders.get_dataloaders(opt)
+dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
@@ -37,7 +37,6 @@ def loopy_iter(dataset):
         for item in dataset :
             yield item
 
-myitr = iter(dataloader2)
 
 #--- the training loop ---#
 already_started = False
@@ -50,7 +49,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             continue
         already_started = True
         cur_iter = epoch*len(dataloader) + i
-        image, label = models.preprocess_input(opt, data_i)
+        image, image2, label = models.preprocess_input(opt, data_i)
 
         #--- generator unconditional update ---#
         model.module.netG.zero_grad()
@@ -91,10 +90,8 @@ for epoch in range(start_epoch, opt.num_epochs):
         # optimizerDe2.step()
 
         #--- lpips ---@
-        data2 = next(myitr)
-        image2, label2 = models.preprocess_input(opt, data2)
         model.module.netG.zero_grad()
-        lpips_loss = model(image2, label2, "LPIPS", losses_computer)
+        lpips_loss = model(image2, label, "LPIPS", losses_computer)
         lpips_loss.backward()
         optimizerG.step()
 
