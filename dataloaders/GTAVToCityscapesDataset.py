@@ -8,6 +8,7 @@ from tqdm import tqdm
 gtav_dataroot = '/no_backups/s1422/patchdata'
 gtav_dataroot2 = '/no_backups/s1422/patchdata3'
 realimg_root = '/no_backups/s1422/patchdata2'
+gtav_dataroot_origin = '/data/public/gta'
 
 class GTAVToCityscapesDataset(torch.utils.data.Dataset):
     def __init__(self, opt, for_metrics,for_supervision = False):
@@ -111,7 +112,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
                     for item in sorted(os.listdir(cur_folder)):
                         images.append(os.path.join(city_folder, item))
             labels = []
-            path_lab = os.path.join(gtav_dataroot,'labels')
+            path_lab = os.path.join(gtav_dataroot_origin,'labels')
             for label_map in sorted(os.listdir(path_lab)):
                 if label_map.find(".png") != -1:
                     labels.append(label_map)
