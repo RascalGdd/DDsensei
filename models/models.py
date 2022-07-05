@@ -185,13 +185,6 @@ class Unpaired_model(nn.Module):
             loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
             loss_Du += loss_Du_real
 
-            losses_decoder = 0
-            features = self.netDu(image, for_features=True)
-            decoder_output = self.wavelet_decoder(features[0], features[1], features[2], features[3], features[4], features[5])
-            decoder_loss = nn.L1Loss()
-            losses_decoder += decoder_loss(image, decoder_output).mean()
-            loss_Du += losses_decoder
-
             return loss_Du, [loss_Du_fake,loss_Du_real]
 
 
