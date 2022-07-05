@@ -7,8 +7,6 @@ from utils.fid_scores import fid_pytorch
 from utils.miou_scores import miou_pytorch
 
 import config
-import os
-os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -47,10 +45,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             continue
         already_started = True
         cur_iter = epoch*len(dataloader) + i
-        print(data_i['label'])
-        print(data_i['label'].shape)
         image, label = models.preprocess_input(opt, data_i)
-        asdasdw
         #--- generator unconditional update ---#
         model.module.netG.zero_grad()
         loss_G, losses_G_list = model(image, label, "losses_G", losses_computer)
