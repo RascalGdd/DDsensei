@@ -18,7 +18,7 @@ def get_dataloaders(opt):
     dataset_name   = get_dataset_name(opt.dataset_mode)
 
     file = __import__("dataloaders."+dataset_name)
-    dataset_train = file.__dict__[dataset_name].__dict__[dataset_name](opt, for_metrics=False)
+    dataset_train = file.__dict__[dataset_name].__dict__[dataset_name+"2"](opt, for_metrics=False)
     dataset_supervised = file.__dict__[dataset_name].__dict__[dataset_name](opt,for_metrics = False ,for_supervision = True)
     dataset_val   = file.__dict__[dataset_name].__dict__[dataset_name](opt, for_metrics=True)
     print("Created %s, size train: %d, size val: %d" % (dataset_name, len(dataset_train), len(dataset_val)))
