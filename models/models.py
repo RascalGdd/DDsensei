@@ -200,10 +200,10 @@ class Unpaired_model(nn.Module):
         if mode == "LPIPS":
             fake = self.netG(label,edges = edges)
             fake = tf.Normalize([0.5,0.5,0.5],[0.5,0.5,0.5])(fake)
-            print(torch.argmax(fake))
-            print(torch.argmin(fake))
-            print(torch.argmax(image))
-            print(torch.argmin(image))
+            print(torch.max(fake))
+            print(torch.min(fake))
+            print(torch.max(image))
+            print(torch.min(image))
             LPIPS_loss = self.lpips(image,fake).mean()
 
             return LPIPS_loss
