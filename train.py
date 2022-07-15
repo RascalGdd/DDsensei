@@ -91,7 +91,6 @@ for epoch in range(start_epoch, opt.num_epochs):
 
         #--- lpips ---@
         if opt.lpips:
-            print("lpips mode!")
             model.module.netG.zero_grad()
             lpips_loss = model(image2, label, "LPIPS", losses_computer)
             lpips_loss.backward()
