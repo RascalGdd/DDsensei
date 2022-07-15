@@ -90,10 +90,12 @@ for epoch in range(start_epoch, opt.num_epochs):
         # optimizerDe2.step()
 
         #--- lpips ---@
-        model.module.netG.zero_grad()
-        lpips_loss = model(image2, label, "LPIPS", losses_computer)
-        lpips_loss.backward()
-        optimizerG.step()
+        if opt.lpips:
+            print("lpips mode!")
+            model.module.netG.zero_grad()
+            lpips_loss = model(image2, label, "LPIPS", losses_computer)
+            lpips_loss.backward()
+            optimizerG.step()
 
         # --- unconditional discriminator regulaize ---#
         if i % opt.reg_every == 0:

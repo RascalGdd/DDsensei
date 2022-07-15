@@ -54,6 +54,7 @@ def add_all_arguments(parser, train):
     parser.add_argument('--supervised_num', type=int, default=50,help='use edges of canny detector as extra intermediate features')
     parser.add_argument('--feature_matching_type', type=int, default=0,help='which type of feature matching to use')
     parser.add_argument('--lambda_segment',type=int, default= 1,help ='weight of the segmentation loss for the generator')
+    parser.add_argument('--lpips',action = 'store_true', help='use lpips, otherwise only patch method')
 
     if train:
         parser.add_argument('--freq_print', type=int, default=1000, help='frequency of showing training results')
