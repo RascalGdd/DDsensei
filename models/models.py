@@ -108,7 +108,7 @@ class Unpaired_model(nn.Module):
 
         if mode == "losses_G":
             vgg_weight = 1
-            vgg_loss = lp(net='vgg')
+            vgg_loss = lp(net='vgg').cuda()
 
             loss_G_gan = 0
             loss_G_lpips = 0

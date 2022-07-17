@@ -31,12 +31,12 @@ class VGG16(torch.nn.Module):
 	def __init__(self, requires_grad=False, padding='replicate', replace_reluguided=False):
 		super(VGG16, self).__init__()
 
-		self.mean = torch.zeros(1,3,1,1, requires_grad=False)
+		self.mean = torch.zeros(1,3,1,1, requires_grad=False).cuda()
 		self.mean[0,0,0,0] = 0.485
 		self.mean[0,1,0,0] = 0.456
 		self.mean[0,2,0,0] = 0.406
 
-		self.std = torch.zeros(1,3,1,1, requires_grad=False)
+		self.std = torch.zeros(1,3,1,1, requires_grad=False).cuda()
 		self.std[0,0,0,0] = 0.229
 		self.std[0,1,0,0] = 0.224
 		self.std[0,2,0,0] = 0.225
