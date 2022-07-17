@@ -9,151 +9,6 @@ import random
 from torch.nn import functional as F
 from models.conv2d_gradfix import conv2d_gradfix
 
-class Wavelet_decoder_new(nn.Module):
-    def __init__(self, in_channels=3, features=64):
-        super().__init__()
-        self.up1 = Upblock2(features * 8, features * 8, 3)
-        self.up2 = Upblock2(features * 8 * 2, features * 8, 3)
-        self.up3 = Upblock2(features * 8 * 2, features * 8, 3)
-        self.up4 = Upblock2(features * 8 * 2, features * 8, 3)
-        self.up5 = Upblock2(features * 8 * 2, features * 4, 3)
-        self.up6 = Upblock2(features * 8, 12, 3)
-        self.tanh = nn.Tanh()
-        # self.final_up = nn.Sequential(
-        #     nn.ConvTranspose2d(features, in_channels, 4, 2, 1),
-        # )
-
-        self.iwt = InverseHaarTransform(3)
-
-    def forward(self, a, b, c, d, e, f,for_image=False,for_blue=False):
-        x1 = self.up1(f)
-        a_ = torch.cat([x1, e], dim=1)
-        x2 = self.up2(torch.cat([x1, e], dim=1))
-        b_ = torch.cat([x2, d], dim=1)
-        x3 = self.up3(torch.cat([x2, d], dim=1))
-        c_ = torch.cat([x3, c], dim=1)
-        x4 = self.up4(torch.cat([x3, c], dim=1))
-        d_ = torch.cat([x4, b], dim=1)
-        x5 = self.up5(torch.cat([x4, b], dim=1))
-        e_ = torch.cat([x5, a], dim=1)
-        x6 = self.up6(torch.cat([x5, a], dim=1))
-        image = self.iwt(x6)
-        image = self.tanh(image)
-        # x7 = self.final_up(x6)
-        if for_image:
-            return image
-        elif for_blue:
-            return a_, b_, c_, d_, e_
-        else:
-            return x6
-
-class Upblock(nn.Module):
-    def __init__(self,in_channels,out_channels,kernel_size):
-        super().__init__()
-        self.iwt = InverseHaarTransform(3)
-        self.up = nn.Upsample(scale_factor=2,mode="bilinear",align_corners=True)
-        self.dwt = HaarTransform(3)
-        self.conv = ConvLayer(in_channels,out_channels,kernel_size)
-
-    def forward(self, x):
-        x = self.iwt(x)
-        x = self.up(x)
-        x = self.dwt(x)
-        x = self.conv(x)
-
-        return x
-
-
-class Upblock2(nn.Module):
-    def __init__(self,in_channels,out_channels,kernel_size):
-        super().__init__()
-        self.up = nn.Upsample(scale_factor=2, mode="nearest")
-        self.conv = ConvLayer(in_channels, out_channels, kernel_size)
-
-    def forward(self, x):
-        x = self.up(x)
-        x = self.conv(x)
-
-        return x
-
-class BluePart(nn.Module):
-    def __init__(self,features=3):
-        super().__init__()
-        self.conv1 = ConvLayer(1024, 12, 1)
-        self.conv2 = ConvLayer(1024, 12, 1)
-        self.conv3 = ConvLayer(1024, 12, 1)
-        self.conv4 = ConvLayer(1024, 12, 1)
-        self.conv5 = ConvLayer(512, 12, 1)
-        self.up1 = Upblock(features * 4, features * 4, 1)
-        self.up2 = Upblock(features * 8, features * 4, 1)
-        self.up3 = Upblock(features * 8, features * 4, 1)
-        self.up4 = Upblock(features * 8, features * 4, 1)
-        self.up5 = Upblock(features * 8, features * 4, 1)
-        self.iwt = InverseHaarTransform(3)
-        self.tanh = nn.Tanh()
-
-    def forward(self,a,b,c,d,e,for_image=False):
-        a = self.conv1(a)
-        b = self.conv2(b)
-        c = self.conv3(c)
-        d = self.conv4(d)
-        e = self.conv5(e)
-        a = self.up1(a)
-        b = self.up2(torch.cat([a,b],dim=1))
-        c = self.up3(torch.cat([b,c],dim=1))
-        d = self.up4(torch.cat([c,d], dim=1))
-        e = self.up5(torch.cat([d,e], dim=1))
-        image = self.iwt(e)
-        image = self.tanh(image)
-
-        if for_image:
-            return image
-        else:
-            return e
-
-class Wavelet_decoder(nn.Module):
-    def __init__(self, opt, in_channels=3, features=64):
-        super().__init__()
-        norm_layer = norms.get_spectral_norm(opt)
-        self.up1 = Block(opt, features * 8, features * 8, down=False, act="relu", use_dropout=True)
-        self.up2 = Block(opt, features * 8 * 2, features * 8, down=False, act="relu", use_dropout=True)
-        self.up3 = Block(opt, features * 8 * 2, features * 8, down=False, act="relu", use_dropout=False)
-        self.up4 = Block(opt, features * 8 * 2, features * 4, down=False, act="relu", use_dropout=False)
-        self.up5 = Block(opt, features * 12, features * 2, down=False, act="relu", use_dropout=False)
-        self.up6 = Block(opt, features * 6, features, down=False, act="relu", use_dropout=False)
-        self.final_up = nn.Sequential(
-            norm_layer(nn.ConvTranspose2d(features, in_channels, 4, 2, 1)),
-            nn.Tanh(),
-        )
-
-    def forward(self, a, b, c, d, e, f):
-        x1 = self.up1(f)
-        x2 = self.up2(torch.cat([x1, e], dim=1))
-        x3 = self.up3(torch.cat([x2, d], dim=1))
-        x4 = self.up4(torch.cat([x3, c], dim=1))
-        x5 = self.up5(torch.cat([x4, b], dim=1))
-        x6 = self.up6(torch.cat([x5, a], dim=1))
-        x7 = self.final_up(x6)
-        return x7
-
-class Block(nn.Module):
-    def __init__(self, opt, in_channels, out_channels, down=True, act="relu", use_dropout=False):
-        super().__init__()
-        norm_layer = norms.get_spectral_norm(opt)
-        self.conv = nn.Sequential(
-            norm_layer(nn.Conv2d(in_channels, out_channels, 4, 2, 1, bias=False, padding_mode="reflect"))
-            if down
-            else norm_layer(nn.ConvTranspose2d(in_channels, out_channels, 4, 2, 1, bias=False)),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU() if act else nn.LeakyReLU(0.2)
-        )
-        self.use_dropout = use_dropout
-        self.dropout = nn.Dropout(0.5)
-
-    def forward(self,x):
-        x = self.conv(x)
-        x = self.dropout(x) if self.use_dropout else x
-        return x
 
 class OASIS_Discriminator(nn.Module):
     def __init__(self, opt):
@@ -797,11 +652,10 @@ class WaveletDiscriminator(nn.Module):
             EqualLinear(channels[4], 1),
         )
 
-    def forward(self, input,for_features=False,for_wholefrequency=False):
+    def forward(self, input,for_features = False):
 
 
         input = self.dwt(input)
-        wholefrequency = input
         out = None
         features = []
 
@@ -829,8 +683,6 @@ class WaveletDiscriminator(nn.Module):
         out = self.final_linear(out)
         if for_features :
             return features
-        elif for_wholefrequency:
-            return wholefrequency
         else :
             return out
 

@@ -5,9 +5,8 @@ import os
 from PIL import Image
 import numpy as np
 from tqdm import tqdm
-gtav_dataroot = '/no_backups/s1422/patchdata'
-gtav_dataroot2 = '/no_backups/s1422/patchdata3'
-realimg_root = '/no_backups/s1422/patchdata2'
+gtav_dataroot = '/data/public/gta/labels'
+gtav_dataroot2 = '/data/public/gta/images'
 gtav_dataroot_origin = '/data/public/gta'
 
 class GTAVToCityscapesDataset(torch.utils.data.Dataset):
@@ -267,11 +266,11 @@ class GTAVToCityscapesDataset2(torch.utils.data.Dataset):
                         for item in sorted(os.listdir(cur_folder)):
                             images.append(os.path.join(cur_folder, item))
             else:
-                path_img = os.path.join(realimg_root)
-                # for city_folder in sorted(os.listdir(path_img)):
-                #     cur_folder = os.path.join(path_img, city_folder)
-                for item in sorted(os.listdir(path_img)):
-                    images.append(os.path.join(path_img, item))
+                path_img = os.path.join(self.opt.dataroot, "leftImg8bit", mode)
+                for city_folder in sorted(os.listdir(path_img)):
+                    cur_folder = os.path.join(path_img, city_folder)
+                    for item in sorted(os.listdir(cur_folder)):
+                        images.append(os.path.join(city_folder, item))
             labels = []
             images2 = []
             path_lab = os.path.join(gtav_dataroot)
