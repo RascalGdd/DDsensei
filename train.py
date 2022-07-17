@@ -5,7 +5,7 @@ import dataloaders.dataloaders as dataloaders
 import utils.utils as utils
 from utils.fid_scores import fid_pytorch
 from utils.miou_scores import miou_pytorch
-
+from models.models import cfg
 import config
 
 
@@ -22,7 +22,7 @@ fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
 
 #--- create models ---#
-model = models.Unpaired_model(opt)
+model = models.Unpaired_model(opt,cfg)
 model = models.put_on_multi_gpus(model, opt)
 
 #--- create optimizers ---#
