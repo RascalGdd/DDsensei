@@ -14,6 +14,7 @@ from models.discriminator_losses import LSLoss
 from models.perceptual_losses import LPIPSLoss as lp
 
 
+vgg = vg.VGG16().cuda()
 config_path ="/no_backups/s1422/DDsensei/train_pfd2cs_ie2.yaml"
 with open(config_path) as file:
     cfg = yaml.safe_load(file)
@@ -112,7 +113,7 @@ class Unpaired_model(nn.Module):
             loss_G_gan = 0
             loss_G_lpips = 0
             fake = self.netG(label,edges = edges)
-            realism_maps = self.netD.forward(img=fake, vgg=vg.VGG16(), fix_input=True,
+            realism_maps = self.netD.forward(img=fake, vgg=vgg, fix_input=True,
                                              run_discs=run_discs)
             for i, rm in enumerate(realism_maps):
                 loss_G_gan, _ = tee_loss(loss_G_gan, self.gan_loss.forward_gen(rm[0,:,:,:].unsqueeze(0)).mean())
@@ -153,13 +154,13 @@ class Unpaired_model(nn.Module):
             loss_D_real = 0
             with torch.no_grad():
                 fake = self.netG(label,edges = edges)
-            realism_maps = self.netD.forward(img=fake, vgg=vg.VGG16(),fix_input=True, run_discs=run_discs)
+            realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=run_discs)
             for i, rm in enumerate(realism_maps):
                 loss_D_fake, _ = tee_loss(loss_D_fake, self.gan_loss.forward_fake(rm).mean())
             del rm
             del realism_maps
 
-            realism_maps = self.netD.forward(img=image, vgg=vg.VGG16(),
+            realism_maps = self.netD.forward(img=image, vgg=vgg,
                                        fix_input=False, run_discs=run_discs)
             for i, rm in enumerate(realism_maps):
                 loss_D_real += self.gan_loss.forward_real(rm).mean()
@@ -182,7 +183,7 @@ class Unpaired_model(nn.Module):
         if mode == "losses_D_reg":
             loss_D_reg = 0
             image.requires_grad = True
-            realism_maps = self.netD.forward(img=image, vgg=vg.VGG16(), robust_img=image,
+            realism_maps = self.netD.forward(img=image, vgg=vgg, robust_img=image,
                                        fix_input=False, run_discs=run_discs)
             for i, rm in enumerate(realism_maps):
                 loss_D_reg += self.gan_loss.forward_real(rm).mean()
