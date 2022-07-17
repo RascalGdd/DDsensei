@@ -9,7 +9,7 @@ import models.losses as losses
 from models.CannyFilter import CannyFilter
 import yaml
 from torch import nn, autograd, optim
-import vgg16 as vg
+import models.vgg16 as vg
 from models.discriminator_losses import LSLoss
 from models.perceptual_losses import LPIPSLoss as lp
 
