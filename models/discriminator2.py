@@ -151,7 +151,6 @@ class ProjectionDiscriminator(nn.Module):
 	def forward(self, t):
 		x,y = t
 
-		self._log.debug(f'disc.forward(x: {x.shape}, y: {y.shape})')
 		x = self.model(x)
 
 		_,c,h,w = x.shape
@@ -245,7 +244,7 @@ class PerceptualDiscEnsemble(DiscriminatorEnsemble):
 
 		super(PerceptualDiscEnsemble, self).__init__(make_disc_backbones(configs, cfg))
 		self._log = logging.getLogger('epe.network.pde')
-		self._log.debug(f'Discriminators: {self.discs}')
+		# self._log.debug(f'Discriminators: {self.discs}')
 		pass
 
 	def _parse_config(self, cfg):
@@ -259,9 +258,9 @@ class PerceptualDiscEnsemble(DiscriminatorEnsemble):
 	def prepare_input(self, *, vgg, img, fix_input, run_discs, **kwargs):
 		""" Applies a VGG to img and returns feature maps from relu layers. """
 
-		if self._log.isEnabledFor(logging.DEBUG):
-			self._log.debug(f'PDE:prepare(i:{img.shape}, fix:{fix_input}, run:{run_discs}, other: {kwargs})')
-			pass
+		# if self._log.isEnabledFor(logging.DEBUG):
+		# 	self._log.debug(f'PDE:prepare(i:{img.shape}, fix:{fix_input}, run:{run_discs}, other: {kwargs})')
+		# 	pass
 
 		if self._downsample > 0:
 			a = random.choice([1,2,4])
