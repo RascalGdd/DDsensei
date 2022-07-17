@@ -50,7 +50,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         #--- generator unconditional update ---#
         model.module.netG.zero_grad()
         loss_G, losses_G_list = model(image, label, "losses_G", losses_computer,image2)
-        loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in losses_G_list]
+        loss_G, losses_G_list = loss_G, [None for loss in losses_G_list]
         loss_G.backward()
         optimizerG.step()
 
@@ -60,7 +60,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             p_image, p_label = models.preprocess_input(opt,supervised_data)
             model.module.netG.zero_grad()
             p_loss_G, p_losses_G_list = model(image, label, "losses_G_supervised", losses_computer, image2)
-            p_loss_G, p_losses_G_list = p_loss_G.mean(), [loss.mean() if loss is not None else None for loss in p_losses_G_list]
+            p_loss_G, p_losses_G_list = p_loss_G, [None for loss in p_losses_G_list]
             p_loss_G.backward()
             optimizerG.step()
         else :
@@ -70,7 +70,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         #--- discriminator update ---#
         model.module.netD.zero_grad()
         loss_D, losses_D_list = model(image, label, "losses_D", losses_computer, image2)
-        loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
+        loss_D, losses_D_list = loss_D, [None for loss in losses_D_list]
         loss_D.backward()
         optimizerD.step()
 
@@ -93,7 +93,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         #     optimizerG.step()
         model.module.netD.zero_grad()
         loss_D_reg, _ = model(image, label, "losses_D_reg", losses_computer, image2)
-        loss_D_reg = loss_D_reg.mean()
         loss_D_reg.backward()
         optimizerD.step()
 
