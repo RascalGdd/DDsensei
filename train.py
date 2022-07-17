@@ -117,7 +117,11 @@ for epoch in range(start_epoch, opt.num_epochs):
             if is_best:
                 utils.save_networks(opt, cur_iter, model, best=True)
             _ = miou_computer.update(model,cur_iter)
+<<<<<<< HEAD
         # visualizer_losses(cur_iter,losses_G_list+p_losses_G_list+losses_D_list+losses_Du_list+losses_reg_list)
+=======
+        visualizer_losses(cur_iter, torch.tensor(losses_G_list+p_losses_G_list+losses_D_list+losses_Du_list+losses_reg_list))
+>>>>>>> 568be724cbaed90e429612c02eaa192b388f1e10
 
 #--- after training ---#
 utils.update_EMA(model, cur_iter, dataloader, opt, force_run_stats=True)
