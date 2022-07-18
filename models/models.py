@@ -193,7 +193,7 @@ class Unpaired_model(nn.Module):
             # loss_D2.backward(retain_graph=True)
             reg_loss, _ = tee_loss(0, real_penalty(loss_D_reg, image))
             # (reg_weight * reg_loss).backward()
-            return (0.03 * reg_loss)
+            return (reg_weight * reg_loss), [(reg_weight * reg_loss)]
 
 
     def compute_edges(self,images):
