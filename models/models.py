@@ -122,6 +122,7 @@ class Unpaired_model(nn.Module):
 
             loss_G_lpips, _ = tee_loss(loss_G_lpips,
                                              vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
+            loss_G_lpips = loss_G_lpips.mean()
             loss_G = loss_G_gan + loss_G_lpips
 
             return loss_G, [torch.tensor(0), loss_G_lpips, loss_G_gan, torch.tensor(0)]
