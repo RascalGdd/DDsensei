@@ -50,7 +50,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         #--- generator unconditional update ---#
         model.module.netG.zero_grad()
         loss_G, losses_G_list = model(image, label, "losses_G", losses_computer,image2)
-        loss_G, losses_G_list = loss_G, [None for loss in losses_G_list]
+        loss_G, losses_G_list = loss_G, [loss for loss in losses_G_list]
         loss_G.backward()
         optimizerG.step()
 
@@ -70,7 +70,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         #--- discriminator update ---#
         model.module.netD.zero_grad()
         loss_D, losses_D_list = model(image, label, "losses_D", losses_computer, image2)
-        loss_D, losses_D_list = loss_D, [None for loss in losses_D_list]
+        loss_D, losses_D_list = loss_D, [loss for loss in losses_D_list]
         loss_D.backward()
         optimizerD.step()
 
@@ -92,7 +92,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         #     lpips_loss.backward()
         #     optimizerG.step()
         model.module.netD.zero_grad()
-        loss_D_reg = model(image, label, "losses_D_reg", losses_computer, image2)
+        loss_D_reg, _ = model(image, label, "losses_D_reg", losses_computer, image2)
         loss_D_reg.backward()
         optimizerD.step()
 
@@ -100,7 +100,7 @@ for epoch in range(start_epoch, opt.num_epochs):
 
         # --- unconditional discriminator regulaize ---#
         loss_reg, losses_reg_list = torch.zeros((1)), [torch.zeros((1))]
-        losses_Du_list = [0, 0]
+        losses_Du_list = [torch.zeros(2)]
 
         #--- stats update ---#
         if not opt.no_EMA:
@@ -117,11 +117,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             if is_best:
                 utils.save_networks(opt, cur_iter, model, best=True)
             _ = miou_computer.update(model,cur_iter)
-<<<<<<< HEAD
-        # visualizer_losses(cur_iter,losses_G_list+p_losses_G_list+losses_D_list+losses_Du_list+losses_reg_list)
-=======
         visualizer_losses(cur_iter, torch.tensor(losses_G_list+p_losses_G_list+losses_D_list+losses_Du_list+losses_reg_list))
->>>>>>> 568be724cbaed90e429612c02eaa192b388f1e10
 
 #--- after training ---#
 utils.update_EMA(model, cur_iter, dataloader, opt, force_run_stats=True)
