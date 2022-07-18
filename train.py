@@ -100,7 +100,7 @@ for epoch in range(start_epoch, opt.num_epochs):
 
         # --- unconditional discriminator regulaize ---#
         loss_reg, losses_reg_list = torch.zeros((1)), [torch.zeros((1))]
-        losses_Du_list = [torch.zeros(2)]
+        losses_Du_list = [torch.zeros(1), torch.zeros(1)]
 
         #--- stats update ---#
         if not opt.no_EMA:
