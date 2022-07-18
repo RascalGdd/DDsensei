@@ -29,6 +29,8 @@ model = models.put_on_multi_gpus(model, opt)
 optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
 optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
+optimizerG2 = torch.optim.Adam(model.module.netG2.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
+optimizerF = torch.optim.Adam(model.module.netF.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
 # optimizerDe = torch.optim.Adam(model.module.wavelet_decoder.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 # optimizerDe2 = torch.optim.Adam(model.module.wavelet_decoder2.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 
@@ -89,12 +91,21 @@ for epoch in range(start_epoch, opt.num_epochs):
         # optimizerDe.step()
         # optimizerDe2.step()
 
+        # G2 and F update
+        model.module.netG2.zero_grad()
+        model.module.netF.zero_grad()
+        loss_FG2 = model(image, label, "losses_FG2", losses_computer,image2)
+        loss_FG2.backward()
+        optimizerG2.step()
+        optimizerF.step()
+
+
         #--- lpips ---@
-        if opt.lpips:
-            model.module.netG.zero_grad()
-            lpips_loss = model(image2, label, "LPIPS", losses_computer)
-            lpips_loss.backward()
-            optimizerG.step()
+        # if opt.lpips:
+        #     model.module.netG.zero_grad()
+        #     lpips_loss = model(image2, label, "LPIPS", losses_computer)
+        #     lpips_loss.backward()
+        #     optimizerG.step()
 
         # --- unconditional discriminator regulaize ---#
         if i % opt.reg_every == 0:

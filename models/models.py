@@ -10,7 +10,27 @@ from models.CannyFilter import CannyFilter
 import torchvision.transforms as tf
 import torchmetrics
 from torch import nn, autograd, optim
+import models.networks as networks
+from models.patchnce import PatchNCELoss
 
+criterion = []
+for nce_layer in [0, 4, 8, 12, 16]:
+    criterion.append(PatchNCELoss().to("cuda"))
+
+def calculate_NCE_loss(src, tgt,netG,netF,criterionNCE):
+    n_layers = 5
+    feat_q = netG(tgt, [0, 4, 8, 12, 16], encode_only=True)
+
+    feat_k = netG(src, [0, 4, 8, 12, 16], encode_only=True)
+    feat_k_pool, sample_ids = netF(feat_k, 256, None)
+    feat_q_pool, _ = netF(feat_q, 256, sample_ids)
+
+    total_nce_loss = 0.0
+    for f_q, f_k, crit, nce_layer in zip(feat_q_pool, feat_k_pool, criterionNCE, [0, 4, 8, 12, 16]):
+        loss = crit(f_q, f_k)
+        total_nce_loss += loss.mean()
+
+    return total_nce_loss / n_layers
 
 def d_r1_loss(real_pred, real_img):
     grad_real, = autograd.grad(
@@ -51,6 +71,8 @@ class Unpaired_model(nn.Module):
 
         if opt.phase == "train":
             self.netD = discriminators.OASIS_Discriminator(opt)
+            self.netG2 = networks.define_G(3, 3, 64, 'resnet_9blocks', 'instance', False, 'xavier', 0.02, False, False, ['cuda'])
+            self.netF = networks.define_F(3, 'mlp_sample', 'instance', False,'normal', 0.02, False,['cuda'])
             if opt.netDu == 'wavelet':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
             elif opt.netDu == 'wavelet_decoder':
@@ -84,7 +106,7 @@ class Unpaired_model(nn.Module):
             if opt.add_edge_loss:
                 self.BDCN_loss = losses.BDCNLoss(self.opt.gpu_ids)
 
-    def forward(self, image, label, mode, losses_computer):
+    def forward(self, image, label, mode, losses_computer, image2=None):
         # Branching is applied to be compatible with DataParallel
         inv_idx = torch.arange(256 - 1, -1, -1).long().cuda()
         label_gc = torch.index_select(label.clone(), 2, inv_idx)
@@ -121,6 +143,9 @@ class Unpaired_model(nn.Module):
                 loss_G += loss_G_edge
             else:
                 loss_G_edge = None
+
+            loss_cut = calculate_NCE_loss(fake, image2, self.netG2, self.netF, criterion)
+            loss_G += loss_cut
 
             return loss_G, [loss_G_adv, loss_G_vgg, loss_G_GAN, loss_G_edge]
 
@@ -186,6 +211,13 @@ class Unpaired_model(nn.Module):
             loss_Du += loss_Du_real
 
             return loss_Du, [loss_Du_fake,loss_Du_real]
+
+        if mode == "losses_FG2":
+            with torch.no_grad():
+                fake = self.netG(label,edges = edges)
+            loss_FG2 = calculate_NCE_loss(fake, image2, self.netG2, self.netF, criterion)
+
+            return loss_FG2
 
 
 
