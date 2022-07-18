@@ -117,14 +117,11 @@ for epoch in range(start_epoch, opt.num_epochs):
             if is_best:
                 utils.save_networks(opt, cur_iter, model, best=True)
             _ = miou_computer.update(model,cur_iter)
-<<<<<<< HEAD
-=======
 
         print(losses_G_list)
         print(losses_D_list)
         print(losses_Du_list)
         print(losses_reg_list)
->>>>>>> 2e663c8641b90cfc496fb0111717fe85991538b7
         visualizer_losses(cur_iter,losses_G_list+p_losses_G_list+losses_D_list+losses_Du_list+losses_reg_list)
 
 #--- after training ---#
