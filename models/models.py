@@ -124,7 +124,7 @@ class Unpaired_model(nn.Module):
                                              vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
             loss_G = loss_G_gan + loss_G_lpips
 
-            return loss_G, [0, loss_G_lpips, loss_G_gan, 0]
+            return loss_G, [torch.tensor(0), loss_G_lpips, loss_G_gan, torch.tensor(0)]
 
         if mode == "losses_G_supervised":
             loss_G = 0
@@ -168,7 +168,7 @@ class Unpaired_model(nn.Module):
             del realism_maps
             loss_D = loss_D_real + loss_D_fake
 
-            return loss_D, [loss_D_fake, loss_D_real, 0]
+            return loss_D, [loss_D_fake, loss_D_real, torch.tensor(0)]
 
 
         if mode == "generate":
