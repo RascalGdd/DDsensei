@@ -94,7 +94,7 @@ class Unpaired_model(nn.Module):
             if opt.add_edge_loss:
                 self.BDCN_loss = losses.BDCNLoss(self.opt.gpu_ids)
 
-    def forward(self, image, label, mode, losses_computer, image2):
+    def forward(self, image, label, mode, losses_computer, image2=None):
         # Branching is applied to be compatible with DataParallel
         inv_idx = torch.arange(256 - 1, -1, -1).long().cuda()
         label_gc = torch.index_select(label.clone(), 2, inv_idx)
