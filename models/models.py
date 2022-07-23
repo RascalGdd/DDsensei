@@ -1,6 +1,7 @@
 from models.sync_batchnorm import DataParallelWithCallback
 import models.generator as generators
-import models.discriminator2 as discriminators
+import models.discriminator2 as discriminators2
+import models.discriminator as discriminators
 import os
 import copy
 import torch
@@ -22,7 +23,7 @@ def tee_loss(x, y):
     return x+y, y.detach()
 
 disc_cfg = dict(cfg.get('discriminator', {}))
-mdl = discriminators.PerceptualDiscEnsemble(cfg)
+mdl = discriminators2.PerceptualDiscEnsemble(cfg)
 run_discs = [True] * len(mdl)
 
 def real_penalty(loss, real_img):
@@ -72,8 +73,8 @@ class Unpaired_model(nn.Module):
             self.netG = generators.OASIS_Generator(opt)
 
         if opt.phase == "train":
-            self.netD = discriminators.PerceptualDiscEnsemble(cfg)
-
+            self.netD = discriminators2.PerceptualDiscEnsemble(cfg)
+            self.netD_ori = discriminators.OASIS_Discriminator(opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
             self.featmatch = torch.nn.MSELoss()
         self.gan_loss = LSLoss()
@@ -127,6 +128,58 @@ class Unpaired_model(nn.Module):
 
             return loss_G, [torch.tensor(0), loss_G_lpips, loss_G_gan, torch.tensor(0)]
 
+
+        if mode == "losses_G_ori":
+            loss_G = 0
+            fake = self.netG(label,edges = edges)
+            output_D = self.netD_ori(fake)
+            loss_G_adv = self.opt.lambda_segment*losses_computer.loss(output_D, label, for_real=True)
+            #loss_G_adv = self.opt.lambda_segment*nn.L1Loss(reduction="mean")(output_D[:,:-1,:,:], label)
+
+            # loss_G_adv = torch.zeros_like(loss_G_adv)
+            loss_G += loss_G_adv
+            if self.opt.add_vgg_loss:
+                loss_G_vgg = self.opt.lambda_vgg * self.VGG_loss(fake, image)
+                loss_G += loss_G_vgg
+            else:
+                loss_G_vgg = None
+
+            if self.opt.add_edge_loss:
+                loss_G_edge = self.opt.lambda_edge * self.BDCN_loss(label, fake )
+                loss_G += loss_G_edge
+            else:
+                loss_G_edge = None
+
+            return loss_G
+
+
+        if mode == "losses_D_ori":
+            loss_D = 0
+            with torch.no_grad():
+                fake = self.netG(label,edges = edges)
+            output_D_fake = self.netD_ori(fake)
+            loss_D_fake = losses_computer.loss(output_D_fake, label, for_real=True)
+            loss_D += loss_D_fake
+
+            if self.opt.model_supervision == 2 :
+                output_D_real = self.netD_ori(image)
+                loss_D_real = losses_computer.loss(output_D_real, label, for_real=True)
+                loss_D += loss_D_real
+
+                if not self.opt.no_labelmix:
+                    mixed_inp, mask = generate_labelmix(label, fake, image)
+                    output_D_mixed = self.netD_ori(mixed_inp)
+                    loss_D_lm = self.opt.lambda_labelmix * losses_computer.loss_labelmix(mask, output_D_mixed,
+                                                                                         output_D_fake,
+                                                                                         output_D_real)
+                    loss_D += loss_D_lm
+                else:
+                    loss_D_lm = None
+            else:
+                loss_D_real = None
+                loss_D_lm = None
+            return loss_D, [loss_D_fake, loss_D_real, loss_D_lm]
+
         if mode == "losses_G_supervised":
             loss_G = 0
             fake = self.netG(label,edges = edges)
@@ -169,7 +222,7 @@ class Unpaired_model(nn.Module):
             del realism_maps
             loss_D = loss_D_real + loss_D_fake
 
-            return loss_D, [loss_D_fake, loss_D_real, torch.tensor(0)]
+            return loss_D, [loss_D_fake, loss_D_real]
 
 
         if mode == "generate":
