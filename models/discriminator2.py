@@ -19,6 +19,26 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 logger = logging.getLogger(__name__)
 
+class Block(nn.Module):
+	def __init__(self, in_channels, out_channels, down=True, act="relu", use_dropout=False):
+		super().__init__()
+		self.conv = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, 4, 2, 1, bias=False, padding_mode="reflect")
+            if down
+            else nn.ConvTranspose2d(in_channels, out_channels, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU() if act else nn.LeakyReLU(0.2)
+        )
+		self.use_dropout = use_dropout
+		self.dropout = nn.Dropout(0.5)
+
+	def forward(self,x):
+		x = self.conv(x)
+		x = self.dropout(x) if self.use_dropout else x
+		return x
+
+
+
 class DomainNorm2d(nn.Module):
 	def __init__(self, dim):
 		super(DomainNorm2d, self).__init__()
@@ -131,6 +151,7 @@ class ProjectionDiscriminator(nn.Module):
 		self.num_layers = num_layers+1
 		self.embedding = nn.Embedding(194,dim_out)
 		self.num_layers = num_layers+1
+		self.blocks = nn.Sequential(Block(1, 1), Block(1, 1), Block(1, 1), Block(1, 1))
 
 		for m in self.modules():
 			if isinstance(m, nn.Conv2d):
@@ -177,6 +198,7 @@ class ProjectionDiscriminator(nn.Module):
 		else:
 			x = self.out(x)
 
+		x = self.blocks(x)
 		return x
 
 
