@@ -28,6 +28,7 @@ model = models.put_on_multi_gpus(model, opt)
 #--- create optimizers ---#
 optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
 optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0.9,0.999), weight_decay=0.0001)
+optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 def loopy_iter(dataset):
     while True :
         for item in dataset :
@@ -54,6 +55,14 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_G.backward()
         optimizerG.step()
 
+
+        model.module.netG.zero_grad()
+        loss_G_ori = model(image, label, "losses_G_ori", losses_computer,image2)
+        loss_G_ori = loss_G_ori.mean()
+        loss_G_ori.backward()
+        optimizerG.step()
+
+
         # --- generator conditional update ---#
         if opt.model_supervision != 0 :
             supervised_data = next(supervised_iter)
@@ -73,6 +82,12 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D, losses_D_list = loss_D, [loss for loss in losses_D_list]
         loss_D.backward()
         optimizerD.step()
+
+        model.module.netD_ori.zero_grad()
+        loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
+        loss_D_ori, losses_D_list_ori = loss_D_ori.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list_ori]
+        loss_D_ori.backward()
+        optimizerD_ori.step()
 
         #--- unconditional discriminator update ---#
         # model.module.netDu.zero_grad()
@@ -122,7 +137,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         print(losses_D_list)
         print(losses_Du_list)
         print(losses_reg_list)
-        visualizer_losses(cur_iter,losses_G_list+p_losses_G_list+losses_D_list+losses_Du_list+losses_reg_list)
+        visualizer_losses(cur_iter,losses_G_list+p_losses_G_list+losses_D_list_ori+losses_D_list+losses_reg_list)
 
 #--- after training ---#
 utils.update_EMA(model, cur_iter, dataloader, opt, force_run_stats=True)
