@@ -198,7 +198,6 @@ class Unpaired_model(nn.Module):
             fake = self.netG(label,edges = edges)
             realism_maps = self.netD.forward(img=fake, vgg=vgg, fix_input=False,
                                              run_discs=True)
-            print(realism_maps[0].shape)
             for i, rm in enumerate(realism_maps):
                 loss_G_gan, _ = tee_loss(loss_G_gan, self.gan_loss.forward_gen(rm[0,:,:,:].unsqueeze(0)).mean())
             del rm
@@ -297,9 +296,8 @@ class Unpaired_model(nn.Module):
             del realism_maps
 
             realism_maps = self.netD.forward(img=image, vgg=vgg,
-                                       fix_input=True, run_discs=True)
-            print(realism_maps[2])
-            print(realism_maps[3].shape)
+                                       fix_input=False, run_discs=True)
+
             for i, rm in enumerate(realism_maps):
                 loss_D_real += self.gan_loss.forward_real(rm).mean()
             del rm
@@ -323,7 +321,7 @@ class Unpaired_model(nn.Module):
             loss_D_reg = 0
             image.requires_grad = True
             realism_maps = self.netD.forward(img=image, vgg=vgg, robust_img=image,
-                                       fix_input=False, run_discs=run_discs)
+                                       fix_input=False, run_discs=True)
             for i, rm in enumerate(realism_maps):
                 loss_D_reg += self.gan_loss.forward_real(rm).mean()
             del rm
