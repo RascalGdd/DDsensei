@@ -164,8 +164,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D_reg, _ = model(image, label, "losses_D_reg", losses_computer, image2)
         loss_D_reg.backward()
         optimizerD.step()
-        asda
-
 
 
         # --- unconditional discriminator regulaize ---#
