@@ -14,7 +14,7 @@ import models.vgg16 as vg
 from models.discriminator_losses import LSLoss
 from models.perceptual_losses import LPIPSLoss as lp
 
-run = [True] + [False] * 9
+run = [True] * 10
 vgg = vg.VGG16().cuda()
 config_path ="/no_backups/s1422/DDsensei/train_pfd2cs_ie2.yaml"
 with open(config_path) as file:
