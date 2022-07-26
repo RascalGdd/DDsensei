@@ -23,8 +23,7 @@ def tee_loss(x, y):
     return x+y, y.detach()
 
 disc_cfg = dict(cfg.get('discriminator', {}))
-mdl = discriminators2.PerceptualDiscEnsemble(cfg)
-run_discs = [True] * len(mdl)
+# mdl = discriminators2.PerceptualDiscEnsemble(cfg)
 
 def real_penalty(loss, real_img):
     ''' Compute penalty on real images. '''
@@ -75,6 +74,10 @@ class Unpaired_model(nn.Module):
         if opt.phase == "train":
             self.netD = discriminators2.PerceptualDiscEnsemble(cfg)
             self.netD_ori = discriminators.OASIS_Discriminator(opt)
+            if opt.netDu == 'wavelet':
+                self.netDu = discriminators.WaveletDiscriminator(opt)
+            else :
+                self.netDu = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
             self.featmatch = torch.nn.MSELoss()
         self.gan_loss = LSLoss()
@@ -107,6 +110,85 @@ class Unpaired_model(nn.Module):
         else :
             edges = None
 
+        if mode == "losses_G_usis":
+            loss_G = 0
+            fake = self.netG(label,edges = edges)
+            output_D = self.netD_ori(fake)
+            loss_G_adv = self.opt.lambda_segment*losses_computer.loss(output_D, label, for_real=True)
+            #loss_G_adv = self.opt.lambda_segment*nn.L1Loss(reduction="mean")(output_D[:,:-1,:,:], label)
+
+            # loss_G_adv = torch.zeros_like(loss_G_adv)
+            loss_G += loss_G_adv
+            if self.opt.add_vgg_loss:
+                loss_G_vgg = self.opt.lambda_vgg * self.VGG_loss(fake, image)
+                loss_G += loss_G_vgg
+            else:
+                loss_G_vgg = None
+
+            pred_fake = self.netDu(fake)
+            loss_G_GAN = self.criterionGAN(pred_fake, True).mean()
+            loss_G += loss_G_GAN
+
+            if self.opt.add_edge_loss:
+                loss_G_edge = self.opt.lambda_edge * self.BDCN_loss(label, fake )
+                loss_G += loss_G_edge
+            else:
+                loss_G_edge = None
+
+            return loss_G, [loss_G_adv, loss_G_vgg, loss_G_GAN, loss_G_edge]
+
+        if mode == "losses_D_usis":
+            loss_D = 0
+            with torch.no_grad():
+                fake = self.netG(label,edges = edges)
+            output_D_fake = self.netD_ori(fake)
+            loss_D_fake = losses_computer.loss(output_D_fake, label, for_real=True)
+            loss_D += loss_D_fake
+
+            if self.opt.model_supervision == 2 :
+                output_D_real = self.netD_ori(image)
+                loss_D_real = losses_computer.loss(output_D_real, label, for_real=True)
+                loss_D += loss_D_real
+
+                if not self.opt.no_labelmix:
+                    mixed_inp, mask = generate_labelmix(label, fake, image)
+                    output_D_mixed = self.netD_ori(mixed_inp)
+                    loss_D_lm = self.opt.lambda_labelmix * losses_computer.loss_labelmix(mask, output_D_mixed,
+                                                                                         output_D_fake,
+                                                                                         output_D_real)
+                    loss_D += loss_D_lm
+                else:
+                    loss_D_lm = None
+            else:
+                loss_D_real = None
+                loss_D_lm = None
+            return loss_D, [loss_D_fake, loss_D_real, loss_D_lm]
+
+
+        if mode == "losses_Du_usis":
+            loss_Du = 0
+            with torch.no_grad():
+                fake = self.netG(label,edges = edges)
+            output_Du_fake = self.netDu(fake)
+            loss_Du_fake = self.criterionGAN(output_Du_fake, False).mean()
+            loss_Du += loss_Du_fake
+
+            output_Du_real = self.netDu(image)
+            loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
+            loss_Du += loss_Du_real
+
+            return loss_Du, [loss_Du_fake,loss_Du_real]
+
+
+        if mode == "Du_regulaize":
+            loss_Du = 0
+            image.requires_grad = True
+            real_pred = self.netDu(image)
+            r1_loss = d_r1_loss(real_pred, image).mean()
+            loss_Du += 10 * r1_loss
+            return loss_Du, [r1_loss]
+
+
         if mode == "losses_G":
             vgg_weight = 1
             vgg_loss = lp(net='vgg').cuda()
@@ -114,13 +196,13 @@ class Unpaired_model(nn.Module):
             loss_G_gan = 0
             loss_G_lpips = 0
             fake = self.netG(label,edges = edges)
-            realism_maps = self.netD.forward(img=fake, vgg=vgg, fix_input=True,
-                                             run_discs=run_discs)
+            realism_maps = self.netD.forward(img=fake, vgg=vgg, fix_input=False,
+                                             run_discs=True)
+            print(realism_maps[0].shape)
             for i, rm in enumerate(realism_maps):
                 loss_G_gan, _ = tee_loss(loss_G_gan, self.gan_loss.forward_gen(rm[0,:,:,:].unsqueeze(0)).mean())
             del rm
             del realism_maps
-
             loss_G_lpips, _ = tee_loss(loss_G_lpips,
                                              vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
             loss_G_lpips = loss_G_lpips.mean()
@@ -208,14 +290,16 @@ class Unpaired_model(nn.Module):
             loss_D_real = 0
             with torch.no_grad():
                 fake = self.netG(label,edges = edges)
-            realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=run_discs)
+            realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=True)
             for i, rm in enumerate(realism_maps):
                 loss_D_fake, _ = tee_loss(loss_D_fake, self.gan_loss.forward_fake(rm).mean())
             del rm
             del realism_maps
 
             realism_maps = self.netD.forward(img=image, vgg=vgg,
-                                       fix_input=False, run_discs=run_discs)
+                                       fix_input=True, run_discs=True)
+            print(realism_maps[2])
+            print(realism_maps[3].shape)
             for i, rm in enumerate(realism_maps):
                 loss_D_real += self.gan_loss.forward_real(rm).mean()
             del rm
