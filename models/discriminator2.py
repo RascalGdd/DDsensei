@@ -11,7 +11,7 @@ from torch.nn import init
 import torch.nn.functional as F
 import kornia as K
 
-import network_factory as nf
+import models.network_factory as nf
 
 # this is for Kornia, used just for anti-aliased resizing
 import warnings
