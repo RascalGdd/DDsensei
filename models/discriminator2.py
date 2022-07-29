@@ -198,7 +198,7 @@ class ProjectionDiscriminator(nn.Module):
 		else:
 			x = self.out(x)
 
-		# x = self.blocks(x)
+		x = self.blocks(x)
 
 		return x
 
