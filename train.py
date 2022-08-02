@@ -28,7 +28,7 @@ model = models.put_on_multi_gpus(model, opt)
 #--- create optimizers ---#
 optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
 optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0.9,0.999), weight_decay=0.0001)
-optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
+# optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 # optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 def loopy_iter(dataset):
     while True :
@@ -110,11 +110,11 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerG.step()
 
 
-        model.module.netG.zero_grad()
-        loss_G_ori = model(image, label, "losses_G_ori", losses_computer,image2)
-        loss_G_ori = loss_G_ori.mean()
-        loss_G_ori.backward()
-        optimizerG.step()
+        # model.module.netG.zero_grad()
+        # loss_G_ori = model(image, label, "losses_G_ori", losses_computer,image2)
+        # loss_G_ori = loss_G_ori.mean()
+        # loss_G_ori.backward()
+        # optimizerG.step()
 
 
         # --- generator conditional update ---#
@@ -137,11 +137,11 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D.backward()
         optimizerD.step()
 
-        model.module.netD_ori.zero_grad()
-        loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
-        loss_D_ori, losses_D_list_ori = loss_D_ori.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list_ori]
-        loss_D_ori.backward()
-        optimizerD_ori.step()
+        # model.module.netD_ori.zero_grad()
+        # loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
+        # loss_D_ori, losses_D_list_ori = loss_D_ori.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list_ori]
+        # loss_D_ori.backward()
+        # optimizerD_ori.step()
 
         #--- unconditional discriminator update ---#
         # model.module.netDu.zero_grad()
