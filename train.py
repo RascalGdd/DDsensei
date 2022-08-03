@@ -22,7 +22,7 @@ dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(o
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
-kid = KernelInceptionDistance(subset_size=2)
+kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 
 #--- create models ---#
