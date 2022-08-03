@@ -205,7 +205,7 @@ for epoch in range(start_epoch, opt.num_epochs):
                 b.append(kid_mean)
                 fig = plt.figure()
                 plt.plot(a, b)
-                fig.savefig(os.path.join(opt.checkpoints_dir, "KID.png"))
+                fig.savefig(os.path.join(opt.checkpoints_dir, opt.name, "KID.png"))
             model.module.netG.train()
             if not opt.no_EMA:
                 model.module.netEMA.train()
