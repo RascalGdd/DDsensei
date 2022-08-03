@@ -73,7 +73,7 @@ class Unpaired_model(nn.Module):
 
         if opt.phase == "train":
             self.netD = discriminators2.PerceptualDiscEnsemble(cfg)
-            # self.netD_ori = discriminators.OASIS_Discriminator(opt)
+            self.netD_ori = discriminators.OASIS_Discriminator(opt)
             if opt.netDu == 'wavelet':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
             else :
