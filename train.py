@@ -7,7 +7,9 @@ from utils.fid_scores import fid_pytorch
 from utils.miou_scores import miou_pytorch
 from models.models import cfg
 import config
-
+from torchmetrics.image.kid import KernelInceptionDistance
+import matplotlib.pyplot as plt
+import os
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -20,6 +22,8 @@ dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(o
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
+kid = KernelInceptionDistance(subset_size=2)
+a, b = [], []
 
 #--- create models ---#
 model = models.Unpaired_model(opt,cfg)
@@ -28,8 +32,8 @@ model = models.put_on_multi_gpus(model, opt)
 #--- create optimizers ---#
 optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
 optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0.9,0.999), weight_decay=0.0001)
-# optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
-# optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
+optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
+optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 def loopy_iter(dataset):
     while True :
         for item in dataset :
@@ -110,11 +114,11 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerG.step()
 
 
-        # model.module.netG.zero_grad()
-        # loss_G_ori = model(image, label, "losses_G_ori", losses_computer,image2)
-        # loss_G_ori = loss_G_ori.mean()
-        # loss_G_ori.backward()
-        # optimizerG.step()
+        model.module.netG.zero_grad()
+        loss_G_ori = model(image, label, "losses_G_ori", losses_computer,image2)
+        loss_G_ori = loss_G_ori.mean()
+        loss_G_ori.backward()
+        optimizerG.step()
 
 
         # --- generator conditional update ---#
@@ -137,11 +141,11 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D.backward()
         optimizerD.step()
 
-        # model.module.netD_ori.zero_grad()
-        # loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
-        # loss_D_ori, losses_D_list_ori = loss_D_ori.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list_ori]
-        # loss_D_ori.backward()
-        # optimizerD_ori.step()
+        model.module.netD_ori.zero_grad()
+        loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
+        loss_D_ori, losses_D_list_ori = loss_D_ori.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list_ori]
+        loss_D_ori.backward()
+        optimizerD_ori.step()
 
         #--- unconditional discriminator update ---#
         # model.module.netDu.zero_grad()
@@ -178,6 +182,35 @@ for epoch in range(start_epoch, opt.num_epochs):
             timer(epoch, cur_iter)
         #if cur_iter % opt.freq_save_ckpt == 0:
         #    utils.save_networks(opt, cur_iter, model)
+        if cur_iter % 10 == 0:
+            kid.reset()
+            model.module.netG.eval()
+            if not opt.no_EMA:
+                model.module.netEMA.eval()
+            with torch.no_grad():
+                for i, data_i in enumerate(dataloader_val):
+                    image, label = models.preprocess_input(opt, data_i)
+                    edges = model.module.compute_edges(image)
+                    if opt.no_EMA:
+                        generated = model.module.netG(label, edges=edges)
+                    else:
+                        generated = model.module.netEMA(label, edges=edges)
+                    generated = ((generated + 1)*50).type(torch.uint8)
+                    image = ((image + 1)*50).type(torch.uint8)
+                    # generated = torch.nn.functional.interpolate(generated,scale_factor= 0.5, mode='nearest')
+                    kid.update(image, real=True)
+                    kid.update(generated, real=False)
+                kid_mean, kid_std = kid.compute()
+                a.append(cur_iter)
+                b.append(kid_mean)
+                fig = plt.figure()
+                plt.plot(a, b)
+                fig.savefig(os.path.join(opt.checkpoints_dir, "KID.png"))
+            model.module.netG.train()
+            if not opt.no_EMA:
+                model.module.netEMA.train()
+
+
         if cur_iter % opt.freq_save_latest == 0:
             utils.save_networks(opt, cur_iter, model, latest=True)
         if cur_iter % opt.freq_fid == 0 and cur_iter > 0:
