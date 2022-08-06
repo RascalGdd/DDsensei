@@ -137,6 +137,32 @@ class Unpaired_model(nn.Module):
 
             return loss_G, [loss_G_adv, loss_G_vgg, loss_G_GAN, loss_G_edge]
 
+        if mode == "losses_G_ori2":
+            loss_G = 0
+            fake = self.netG(label,edges = edges)
+            #loss_G_adv = self.opt.lambda_segment*nn.L1Loss(reduction="mean")(output_D[:,:-1,:,:], label)
+
+            # loss_G_adv = torch.zeros_like(loss_G_adv)
+            if self.opt.add_vgg_loss:
+                loss_G_vgg = self.opt.lambda_vgg * self.VGG_loss(fake, image)
+                loss_G += loss_G_vgg
+            else:
+                loss_G_vgg = None
+
+            pred_fake = self.netDu(fake)
+            loss_G_GAN = self.criterionGAN(pred_fake, True).mean()
+            loss_G += loss_G_GAN
+
+            if self.opt.add_edge_loss:
+                loss_G_edge = self.opt.lambda_edge * self.BDCN_loss(label, fake )
+                loss_G += loss_G_edge
+            else:
+                loss_G_edge = None
+
+            return loss_G
+
+
+
         if mode == "losses_D_usis":
             loss_D = 0
             with torch.no_grad():
