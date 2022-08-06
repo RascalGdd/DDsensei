@@ -114,11 +114,11 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerG.step()
 
 
-        model.module.netG.zero_grad()
-        loss_G_ori = model(image, label, "losses_G_ori", losses_computer,image2)
-        loss_G_ori = loss_G_ori.mean()
-        loss_G_ori.backward()
-        optimizerG.step()
+        # model.module.netG.zero_grad()
+        # loss_G_ori = model(image, label, "losses_G_ori", losses_computer,image2)
+        # loss_G_ori = loss_G_ori.mean()
+        # loss_G_ori.backward()
+        # optimizerG.step()
 
 
         # --- generator conditional update ---#
@@ -141,11 +141,11 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D.backward()
         optimizerD.step()
 
-        model.module.netD_ori.zero_grad()
-        loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
-        loss_D_ori, losses_D_list_ori = loss_D_ori.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list_ori]
-        loss_D_ori.backward()
-        optimizerD_ori.step()
+        # model.module.netD_ori.zero_grad()
+        # loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
+        # loss_D_ori, losses_D_list_ori = loss_D_ori.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list_ori]
+        # loss_D_ori.backward()
+        # optimizerD_ori.step()
 
         #--- unconditional discriminator update ---#
         # model.module.netDu.zero_grad()
@@ -182,7 +182,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             timer(epoch, cur_iter)
         #if cur_iter % opt.freq_save_ckpt == 0:
         #    utils.save_networks(opt, cur_iter, model)
-        if cur_iter % 10 == 0:
+        if cur_iter % 2500 == 0:
             kid.reset()
             model.module.netG.eval()
             if not opt.no_EMA:
@@ -219,7 +219,7 @@ for epoch in range(start_epoch, opt.num_epochs):
                 utils.save_networks(opt, cur_iter, model, best=True)
             _ = miou_computer.update(model,cur_iter)
 
-        visualizer_losses(cur_iter,losses_G_list+p_losses_G_list+losses_D_list_ori+losses_D_list+losses_reg_list)
+        # visualizer_losses(cur_iter,losses_G_list+p_losses_G_list+losses_D_list_ori+losses_D_list+losses_reg_list)
 
 #--- after training ---#
 utils.update_EMA(model, cur_iter, dataloader, opt, force_run_stats=True)
