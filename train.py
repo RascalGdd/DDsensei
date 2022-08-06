@@ -54,52 +54,52 @@ for epoch in range(start_epoch, opt.num_epochs):
         image, image2, label = models.preprocess_input2(opt, data_i)
 
         # if cur_iter <= 80000:
-        #     model.module.netG.zero_grad()
-        #     loss_G, losses_G_list = model(image, label, "losses_G_usis", losses_computer)
-        #     loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in losses_G_list]
-        #     loss_G.backward()
-        #     optimizerG.step()
-        #
-        #     # --- generator conditional update ---#
-        #     if opt.model_supervision != 0:
-        #         supervised_data = next(supervised_iter)
-        #         p_image, p_label = models.preprocess_input(opt, supervised_data)
-        #         model.module.netG.zero_grad()
-        #         p_loss_G, p_losses_G_list = model(image, label, "losses_G_supervised", losses_computer)
-        #         p_loss_G, p_losses_G_list = p_loss_G.mean(), [loss.mean() if loss is not None else None for loss in
-        #                                                       p_losses_G_list]
-        #         p_loss_G.backward()
-        #         optimizerG.step()
-        #     else:
-        #         p_loss_G, p_losses_G_list = torch.zeros((1)), [torch.zeros((1))]
-        #
-        #     # --- discriminator update ---#
-        #     model.module.netD_ori.zero_grad()
-        #     loss_D, losses_D_list = model(image, label, "losses_D_usis", losses_computer)
-        #     loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
-        #     loss_D.backward()
-        #     optimizerD_ori.step()
-        #
-        #     # --- unconditional discriminator update ---#
-        #     model.module.netDu.zero_grad()
-        #     loss_Du, losses_Du_list = model(image, label, "losses_Du_usis", losses_computer)
-        #     loss_Du, losses_Du_list = opt.reg_every * loss_Du.mean(), [loss.mean() if loss is not None else None for
-        #                                                                loss in losses_Du_list]
-        #     loss_Du.backward()
-        #     optimizerDu.step()
-        #
-        #     # --- generator psuedo labels updates ---@
-        #
-        #     # --- unconditional discriminator regulaize ---#
-        #     if i % opt.reg_every == 0:
-        #         model.module.netDu.zero_grad()
-        #         loss_reg, losses_reg_list = model(image, label, "Du_regulaize", losses_computer)
-        #         loss_reg, losses_reg_list = loss_reg.mean(), [loss.mean() if loss is not None else None for loss in
-        #                                                       losses_reg_list]
-        #         loss_reg.backward()
-        #         optimizerDu.step()
-        #     else:
-        #         loss_reg, losses_reg_list = torch.zeros((1)), [torch.zeros((1))]
+        model.module.netG.zero_grad()
+        loss_G, losses_G_list = model(image, label, "losses_G_usis", losses_computer)
+        loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in losses_G_list]
+        loss_G.backward()
+        optimizerG.step()
+
+        # --- generator conditional update ---#
+        if opt.model_supervision != 0:
+            supervised_data = next(supervised_iter)
+            p_image, p_label = models.preprocess_input(opt, supervised_data)
+            model.module.netG.zero_grad()
+            p_loss_G, p_losses_G_list = model(image, label, "losses_G_supervised", losses_computer)
+            p_loss_G, p_losses_G_list = p_loss_G.mean(), [loss.mean() if loss is not None else None for loss in
+                                                          p_losses_G_list]
+            p_loss_G.backward()
+            optimizerG.step()
+        else:
+            p_loss_G, p_losses_G_list = torch.zeros((1)), [torch.zeros((1))]
+
+        # --- discriminator update ---#
+        model.module.netD_ori.zero_grad()
+        loss_D, losses_D_list = model(image, label, "losses_D_usis", losses_computer)
+        loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
+        loss_D.backward()
+        optimizerD_ori.step()
+
+        # --- unconditional discriminator update ---#
+        model.module.netDu.zero_grad()
+        loss_Du, losses_Du_list = model(image, label, "losses_Du_usis", losses_computer)
+        loss_Du, losses_Du_list = opt.reg_every * loss_Du.mean(), [loss.mean() if loss is not None else None for
+                                                                   loss in losses_Du_list]
+        loss_Du.backward()
+        optimizerDu.step()
+
+        # --- generator psuedo labels updates ---@
+
+        # --- unconditional discriminator regulaize ---#
+        if i % opt.reg_every == 0:
+            model.module.netDu.zero_grad()
+            loss_reg, losses_reg_list = model(image, label, "Du_regulaize", losses_computer)
+            loss_reg, losses_reg_list = loss_reg.mean(), [loss.mean() if loss is not None else None for loss in
+                                                          losses_reg_list]
+            loss_reg.backward()
+            optimizerDu.step()
+        else:
+            loss_reg, losses_reg_list = torch.zeros((1)), [torch.zeros((1))]
 
 
 
@@ -202,7 +202,7 @@ for epoch in range(start_epoch, opt.num_epochs):
                     kid.update(generated, real=False)
                 kid_mean, kid_std = kid.compute()
                 a.append(cur_iter)
-                b.append(kid_mean.cpu())
+                b.append(kid_mean)
                 fig = plt.figure()
                 plt.plot(a, b)
                 fig.savefig(os.path.join(opt.checkpoints_dir, opt.name, "KID.png"))
