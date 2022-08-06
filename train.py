@@ -202,7 +202,7 @@ for epoch in range(start_epoch, opt.num_epochs):
                     kid.update(generated, real=False)
                 kid_mean, kid_std = kid.compute()
                 a.append(cur_iter)
-                b.append(kid_mean)
+                b.append(kid_mean.cpu())
                 fig = plt.figure()
                 plt.plot(a, b)
                 fig.savefig(os.path.join(opt.checkpoints_dir, opt.name, "KID.png"))
