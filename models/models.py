@@ -371,6 +371,7 @@ class Unpaired_model(nn.Module):
 
 
         if mode == "losses_D_reg":
+            run = self.adaptive_backprop.sample()
             reg_weight = 0.03
             loss_D_reg = 0
             image.requires_grad = True
