@@ -371,12 +371,12 @@ class Unpaired_model(nn.Module):
 
 
         if mode == "losses_D_reg":
-            run = self.adaptive_backprop.sample()
+            # run = self.adaptive_backprop.sample()
             reg_weight = 0.03
             loss_D_reg = 0
             image.requires_grad = True
             realism_maps = self.netD.forward(img=image, vgg=vgg, robust_img=image,
-                                       fix_input=False, run_discs=run)
+                                       fix_input=False, run_discs=True)
             for i, rm in enumerate(realism_maps):
                 loss_D_reg += self.gan_loss.forward_real(rm).mean()
             del rm
