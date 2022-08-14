@@ -13,6 +13,7 @@ from torch import nn, autograd, optim
 import models.vgg16 as vg
 from models.discriminator_losses import LSLoss
 from models.perceptual_losses import LPIPSLoss as lp
+from models.backprop import AdaptiveBackprop
 
 run = [True] * 10
 vgg = vg.VGG16().cuda()
@@ -80,6 +81,7 @@ class Unpaired_model(nn.Module):
                 self.netDu = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
             self.featmatch = torch.nn.MSELoss()
+        self.adaptive_backprop = AdaptiveBackprop(10, "cuda", 0.6)
         self.gan_loss = LSLoss()
         self.print_parameter_count()
         self.init_networks()
@@ -222,8 +224,9 @@ class Unpaired_model(nn.Module):
             loss_G_gan = 0
             loss_G_lpips = 0
             fake = self.netG(label,edges = edges)
+
             realism_maps = self.netD.forward(img=fake, vgg=vgg, fix_input=False,
-                                             run_discs=run)
+                                             run_discs=True)
             for i, rm in enumerate(realism_maps):
                 loss_G_gan, _ = tee_loss(loss_G_gan, self.gan_loss.forward_real(rm).mean())
             del rm
@@ -310,13 +313,24 @@ class Unpaired_model(nn.Module):
                 loss_G_vgg = None
 
         if mode == "losses_D":
+            run = self.adaptive_backprop.sample()
             loss_D = 0
             loss_D_fake = 0
             loss_D_real = 0
             with torch.no_grad():
                 fake = self.netG(label,edges = edges)
             realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=run)
+
+            pred_labels = {}  # for adaptive backprop
             for i, rm in enumerate(realism_maps):
+
+                if rm is None:
+                    continue
+
+                pred_labels[i] = [(rm.detach() < 0.5).float().reshape(1, -1)]
+                pass
+
+
                 loss_D_fake, _ = tee_loss(loss_D_fake, self.gan_loss.forward_fake(rm).mean())
             del rm
             del realism_maps
@@ -325,10 +339,24 @@ class Unpaired_model(nn.Module):
                                        fix_input=False, run_discs=run)
 
             for i, rm in enumerate(realism_maps):
+
+                if rm is None:
+                    continue
+
+                if i in pred_labels:
+                    # predicted correctly, here real as real
+                    pred_labels[i].append((rm.detach() > 0.5).float().reshape(1, -1))
+                else:
+                    pred_labels[i] = [(rm.detach() > 0.5).float().reshape(1, -1)]
+                    pass
+
+
                 loss_D_real += self.gan_loss.forward_real(rm).mean()
             del rm
             del realism_maps
             loss_D = loss_D_real + loss_D_fake
+
+            self.adaptive_backprop.update(pred_labels)
 
             return loss_D, [loss_D_fake, loss_D_real]
 
