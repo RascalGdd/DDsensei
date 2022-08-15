@@ -314,6 +314,8 @@ class Unpaired_model(nn.Module):
 
         if mode == "losses_D":
             run = self.adaptive_backprop.sample()
+            if not any(run):
+                run = True
             loss_D = 0
             loss_D_fake = 0
             loss_D_real = 0
