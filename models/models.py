@@ -43,7 +43,6 @@ def d_r1_loss(real_pred, real_img):
 
     return grad_penalty
 
-
 class Unpaired_model(nn.Module):
     def __init__(self, opt, cfg):
         super(Unpaired_model, self).__init__()
@@ -321,7 +320,7 @@ class Unpaired_model(nn.Module):
             loss_D_real = 0
             with torch.no_grad():
                 fake = self.netG(label,edges = edges)
-            realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=run)
+            realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=True)
 
             pred_labels = {}  # for adaptive backprop
             for i, rm in enumerate(realism_maps):
@@ -338,7 +337,7 @@ class Unpaired_model(nn.Module):
             del realism_maps
 
             realism_maps = self.netD.forward(img=image, vgg=vgg,
-                                       fix_input=False, run_discs=run)
+                                       fix_input=False, run_discs=True)
 
             for i, rm in enumerate(realism_maps):
 

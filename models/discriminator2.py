@@ -19,6 +19,20 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 logger = logging.getLogger(__name__)
 
+
+def stack(a):
+    B, C, H, W = a.shape[0], a.shape[1], a.shape[2], a.shape[3]
+    size = 2
+    Y = H // size
+    X = W // size
+    m = a[:, :, :Y, :X]
+    n = a[:, :, Y:, :X]
+    q = a[:, :, :Y, X:]
+    p = a[:, :, Y:, X:]
+    a = torch.cat([m, n, p, q])
+
+    return a
+
 class DomainNorm2d(nn.Module):
 	def __init__(self, dim):
 		super(DomainNorm2d, self).__init__()
@@ -169,6 +183,8 @@ class ProjectionDiscriminator(nn.Module):
 
 
 	def forward(self, t):
+		t = stack(t)
+
 		x,y = t
 
 		# self._log.debug(f'disc.forward(x: {x.shape}, y: {y.shape})')
