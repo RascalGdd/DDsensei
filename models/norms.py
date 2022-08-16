@@ -70,7 +70,7 @@ def get_norm_layer(opt, norm_nc):
     if opt.param_free_norm == 'batch':
         return nn.BatchNorm2d(norm_nc, affine=False)
     if opt.param_free_norm == 'group':
-        return nn.GroupNorm(8, norm_nc, affine=False),
+        return nn.GroupNorm(1, norm_nc, affine=False),
     else:
         raise ValueError('%s is not a recognized param-free norm type in SPADE'
                          % opt.param_free_norm)
