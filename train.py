@@ -34,6 +34,7 @@ optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas
 optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0.9,0.999), weight_decay=0.0001)
 optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
+optimizerDe = torch.optim.Adam(model.module.wavelet_decoder.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 def loopy_iter(dataset):
     while True :
         for item in dataset :
@@ -82,10 +83,12 @@ for epoch in range(start_epoch, opt.num_epochs):
         #
         # # --- unconditional discriminator update ---#
         model.module.netDu.zero_grad()
-        loss_Du, losses_Du_list = model(image, label, "losses_Du_usis", losses_computer)
+        model.module.wavelet_decoder.zero_grad()
+        loss_Du, losses_Du_list = model(image, label, "losses_Du_usis_decoder", losses_computer)
         loss_Du, losses_Du_list = opt.reg_every * loss_Du.mean(), [loss.mean() if loss is not None else None for
                                                                    loss in losses_Du_list]
         loss_Du.backward()
+        optimizerDe.step()
         optimizerDu.step()
         #
         # # --- generator psuedo labels updates ---@
