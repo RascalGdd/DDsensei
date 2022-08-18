@@ -76,6 +76,9 @@ class Unpaired_model(nn.Module):
             self.netD_ori = discriminators.OASIS_Discriminator(opt)
             if opt.netDu == 'wavelet':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
+            if opt.netDu == 'wavelet_decoder':
+                self.netDu = discriminators.WaveletDiscriminator(opt)
+                self.wavelet_decoder = discriminators.Wavelet_decoder(opt)
             else :
                 self.netDu = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
@@ -203,6 +206,27 @@ class Unpaired_model(nn.Module):
             output_Du_real = self.netDu(image)
             loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
             loss_Du += loss_Du_real
+
+            return loss_Du, [loss_Du_fake,loss_Du_real]
+
+        if mode == "losses_Du_usis_decoder":
+            loss_Du = 0
+            with torch.no_grad():
+                fake = self.netG(label,edges = edges)
+            output_Du_fake = self.netDu(fake)
+            loss_Du_fake = self.criterionGAN(output_Du_fake, False).mean()
+            loss_Du += loss_Du_fake
+
+            output_Du_real = self.netDu(image)
+            loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
+            loss_Du += loss_Du_real
+
+            losses_decoder = 0
+            features = self.netDu(image, for_features=True)
+            decoder_output = self.wavelet_decoder(features[0], features[1], features[2], features[3], features[4], features[5])
+            decoder_loss = nn.L1Loss()
+            losses_decoder += decoder_loss(image, decoder_output).mean()
+            loss_Du += losses_decoder
 
             return loss_Du, [loss_Du_fake,loss_Du_real]
 

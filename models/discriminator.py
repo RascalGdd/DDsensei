@@ -10,6 +10,51 @@ from torch.nn import functional as F
 from models.conv2d_gradfix import conv2d_gradfix
 
 
+class Wavelet_decoder(nn.Module):
+    def __init__(self, opt, in_channels=3, features=64):
+        super().__init__()
+        norm_layer = norms.get_spectral_norm(opt)
+        self.up1 = Block(opt, features * 8, features * 8, down=False, act="relu", use_dropout=True)
+        self.up2 = Block(opt, features * 8 * 2, features * 8, down=False, act="relu", use_dropout=True)
+        self.up3 = Block(opt, features * 8 * 2, features * 8, down=False, act="relu", use_dropout=False)
+        self.up4 = Block(opt, features * 8 * 2, features * 4, down=False, act="relu", use_dropout=False)
+        self.up5 = Block(opt, features * 12, features * 2, down=False, act="relu", use_dropout=False)
+        self.up6 = Block(opt, features * 6, features, down=False, act="relu", use_dropout=False)
+        self.final_up = nn.Sequential(
+            norm_layer(nn.ConvTranspose2d(features, in_channels, 4, 2, 1)),
+            nn.Tanh(),
+        )
+
+    def forward(self, a, b, c, d, e, f):
+        x1 = self.up1(f)
+        x2 = self.up2(torch.cat([x1, e], dim=1))
+        x3 = self.up3(torch.cat([x2, d], dim=1))
+        x4 = self.up4(torch.cat([x3, c], dim=1))
+        x5 = self.up5(torch.cat([x4, b], dim=1))
+        x6 = self.up6(torch.cat([x5, a], dim=1))
+        x7 = self.final_up(x6)
+        return x7
+
+class Block(nn.Module):
+    def __init__(self, opt, in_channels, out_channels, down=True, act="relu", use_dropout=False):
+        super().__init__()
+        norm_layer = norms.get_spectral_norm(opt)
+        self.conv = nn.Sequential(
+            norm_layer(nn.Conv2d(in_channels, out_channels, 4, 2, 1, bias=False, padding_mode="reflect"))
+            if down
+            else norm_layer(nn.ConvTranspose2d(in_channels, out_channels, 4, 2, 1, bias=False)),
+            nn.InstanceNorm2d(out_channels),
+            nn.ReLU() if act else nn.LeakyReLU(0.2)
+        )
+        self.use_dropout = use_dropout
+        self.dropout = nn.Dropout(0.5)
+
+    def forward(self,x):
+        x = self.conv(x)
+        x = self.dropout(x) if self.use_dropout else x
+        return x
+
+
 class OASIS_Discriminator(nn.Module):
     def __init__(self, opt):
         super().__init__()

@@ -4,68 +4,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch
 
-def make_conv_layer(dims, strides=1, leaky_relu=True, spectral=False, norm_factory=None, skip_final_relu=False,
-                    kernel=3):
-    """ Make simple convolutional networks without downsampling.
-
-    dims -- list with channel widths, where len(dims)-1 is the number of concolutional layers to create.
-    strides -- stride of first convolution if int, else stride of each convolution, respectively
-    leaky_relu -- yes or no (=use ReLU instead)
-    spectral -- use spectral norm
-    norm_factory -- function taking a channel width and returning a normalization layer.
-    skip_final_relu -- don't use a relu at the end
-    kernel -- width of kernel
-    """
-
-    if type(strides) == int:
-        strides = [strides] + [1] * (len(dims) - 2)
-        pass
-
-    c = nn.Conv2d(dims[0], dims[1], kernel, stride=strides[0], bias=spectral)
-    m = [] if kernel == 1 else [nn.ReplicationPad2d(kernel // 2)]
-    m += [c if not spectral else torch.nn.utils.spectral_norm(c)]
-
-    if norm_factory:
-        m += [norm_factory(dims[1])]
-        pass
-
-    m += [nn.LeakyReLU(0.2, inplace=True) if leaky_relu else nn.ReLU(inplace=True)]
-
-    num_convs = len(dims) - 2
-    for i, di in enumerate(dims[2:]):
-        c = nn.Conv2d(dims[i + 1], di, 3, stride=strides[i + 1], bias=spectral)
-
-        if kernel > 1:
-            m += [nn.ReplicationPad2d(kernel // 2)]
-        m += [c if not spectral else torch.nn.utils.spectral_norm(c)]
-
-        if norm_factory:
-            m += [norm_factory(di)]
-            pass
-
-        if i == num_convs - 1 and skip_final_relu:
-            continue
-        else:
-            m += [nn.LeakyReLU(0.2, inplace=True) if leaky_relu else nn.ReLU(inplace=True)]
-        pass
-
-    return nn.Sequential(*m)
-
-
-class ResBlock(nn.Module):
-    def __init__(self, dims, first_stride=1, leaky_relu=True, spectral=False, norm_factory=None, kernel=3):
-        super(ResBlock, self).__init__()
-
-        self.conv = make_conv_layer(dims, first_stride, leaky_relu, spectral, norm_factory, True, kernel=kernel)
-        self.down = make_conv_layer([dims[0], dims[-1]], first_stride, leaky_relu, spectral, None, True, kernel=kernel) \
-			if first_stride != 1 or dims[0] != dims[-1] else None
-        self.relu = nn.LeakyReLU(0.2, inplace=True) if leaky_relu else nn.ReLU(inplace=True)
-        pass
-
-    def forward(self, x):
-        return self.relu(self.conv(x) + (x if self.down is None else self.down(x)))
-
-
 
 class SPADE(nn.Module):
     def __init__(self, opt, norm_nc, label_nc):
@@ -105,13 +43,11 @@ class IWT_SPADE_HWT(nn.Module):
         self.mlp_beta = nn.Conv2d(nhidden, norm_nc//4, kernel_size=ks, padding=pw)
         self.iwt = InverseHaarTransform(3)
         self.hwt = HaarTransform(3)
-        self.res = ResBlock([99, 99, 99])
 
     def forward(self, x, segmap):
         x = self.iwt(x)
         normalized = self.first_norm(x)
         segmap = F.interpolate(segmap, size=x.size()[2:], mode='nearest')
-        segmap = self.res(segmap)
 
         actv = self.mlp_shared(segmap)
         gamma = self.mlp_gamma(actv)
