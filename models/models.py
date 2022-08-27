@@ -346,15 +346,14 @@ class Unpaired_model(nn.Module):
                 fake = self.netG(label,edges = edges)
             realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=True)
 
-            pred_labels = {}  # for adaptive backprop
+            # pred_labels = {}  # for adaptive backprop
             for i, rm in enumerate(realism_maps):
 
-                if rm is None:
-                    continue
-
-                pred_labels[i] = [(rm.detach() < 0.5).float().reshape(1, -1)]
-                pass
-
+                # if rm is None:
+                #     continue
+                #
+                # pred_labels[i] = [(rm.detach() < 0.5).float().reshape(1, -1)]
+                # pass
 
                 loss_D_fake, _ = tee_loss(loss_D_fake, self.gan_loss.forward_fake(rm).mean())
             del rm
@@ -365,23 +364,23 @@ class Unpaired_model(nn.Module):
 
             for i, rm in enumerate(realism_maps):
 
-                if rm is None:
-                    continue
-
-                if i in pred_labels:
-                    # predicted correctly, here real as real
-                    pred_labels[i].append((rm.detach() > 0.5).float().reshape(1, -1))
-                else:
-                    pred_labels[i] = [(rm.detach() > 0.5).float().reshape(1, -1)]
-                    pass
-
+                # if rm is None:
+                #     continue
+                #
+                # if i in pred_labels:
+                #     # predicted correctly, here real as real
+                #     pred_labels[i].append((rm.detach() > 0.5).float().reshape(1, -1))
+                # else:
+                #     pred_labels[i] = [(rm.detach() > 0.5).float().reshape(1, -1)]
+                #     pass
+                #
 
                 loss_D_real += self.gan_loss.forward_real(rm).mean()
             del rm
             del realism_maps
             loss_D = loss_D_real + loss_D_fake
 
-            self.adaptive_backprop.update(pred_labels)
+            # self.adaptive_backprop.update(pred_labels)
 
             return loss_D, [loss_D_fake, loss_D_real]
 
