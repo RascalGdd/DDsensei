@@ -2,6 +2,7 @@ import torch
 import models.losses as losses
 import models.models as models
 import dataloaders.dataloaders as dataloaders
+import dataloaders.cropdataset.final_data as final_data
 import utils.utils as utils
 from utils.fid_scores import fid_pytorch
 from utils.miou_scores import miou_pytorch
@@ -19,6 +20,8 @@ timer = utils.timer(opt)
 visualizer_losses = utils.losses_saver(opt)
 losses_computer = losses.losses_computer(opt)
 dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
+if opt.crop:
+    dataloader = final_data.get_dataloader()
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
@@ -52,7 +55,13 @@ for epoch in range(start_epoch, opt.num_epochs):
             continue
         already_started = True
         cur_iter = epoch*len(dataloader) + i
-        image, image2, label = models.preprocess_input2(opt, data_i)
+        if not opt.crop:
+            image, image2, label = models.preprocess_input2(opt, data_i)
+        else:
+            image, image2, label = models.preprocess_input3(opt, data_i)
+        print("1",image.shape)
+        print("2", image2.shape)
+        print("3", label.shape)
 
         # if cur_iter <= 80000:
         # model.module.netG.zero_grad()
