@@ -5,8 +5,8 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from sample_matches import load_crops
-from cfg import *
+from dataloaders.cropdataset.sample_matches import load_crops
+from dataloaders.cropdataset.cfg import *
 
 
 def load_matching_crops(path):

@@ -4,8 +4,8 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from filter import load_matching_crops
-from cfg import *
+from dataloaders.cropdataset.filter import load_matching_crops
+from dataloaders.cropdataset.cfg import *
 
 
 width = 957

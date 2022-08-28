@@ -6,12 +6,12 @@ from tqdm import tqdm
 import numpy as np
 import torch
 
-from batch_types import JointEPEBatch
-from sample_matches import load_crops
-from filter import load_matching_crops
+from dataloaders.cropdataset.batch_types import JointEPEBatch
+from dataloaders.cropdataset.sample_matches import load_crops
+from dataloaders.cropdataset.filter import load_matching_crops
 import torchvision.transforms as tf
 from torchvision.transforms.functional import InterpolationMode
-from cfg import *
+from dataloaders.cropdataset.cfg import *
 
 
 class PairedDataset(torch.utils.data.Dataset):

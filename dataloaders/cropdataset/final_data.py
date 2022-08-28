@@ -1,8 +1,8 @@
 import torch
 
-from paired import MatchedCrops
-from crop import *
-from cfg import *
+from dataloaders.cropdataset.paired import MatchedCrops
+from dataloaders.cropdataset.crop import *
+from dataloaders.cropdataset.cfg import *
 from torch.utils.data import DataLoader
 import pandas as pd
 import torchvision.transforms as tf

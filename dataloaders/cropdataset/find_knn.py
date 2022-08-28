@@ -3,7 +3,7 @@ from pathlib import Path
 import os
 import faiss
 import numpy as np
-from cfg import *
+from dataloaders.cropdataset.cfg import *
 
 if __name__ == '__main__':
 
