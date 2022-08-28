@@ -153,7 +153,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
 
     def transforms(self, image, label):
         # resize
-        new_width, new_height = (int(self.opt.load_size / self.opt.aspect_ratio), self.opt.load_size)
+        new_width, new_height = (int(self.opt.load_size / self.opt.aspect_ratio), int(self.opt.load_size / self.opt.aspect_ratio))
         image = TR.functional.resize(image, (new_width, new_height), Image.BICUBIC)
         label = TR.functional.resize(label, (new_width, new_height), Image.NEAREST)
         # flip
@@ -320,7 +320,7 @@ class GTAVToCityscapesDataset2(torch.utils.data.Dataset):
 
     def transforms(self, image, label, image2):
         # resize
-        new_width, new_height = (int(self.opt.load_size / self.opt.aspect_ratio), self.opt.load_size)
+        new_width, new_height = (int(self.opt.load_size / self.opt.aspect_ratio), int(self.opt.load_size / self.opt.aspect_ratio))
         image = TR.functional.resize(image, (new_width, new_height), Image.BICUBIC)
         image2 = TR.functional.resize(image2, (new_width, new_height), Image.BICUBIC)
         label = TR.functional.resize(label, (new_width, new_height), Image.NEAREST)
