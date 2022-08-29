@@ -16,6 +16,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
         opt.crop_size =  512 if for_metrics else 512
         if opt.crop:
             opt.crop_size = 256
+            opt.load_size = 256
         opt.label_nc = 34
         opt.contain_dontcare_label = True
         opt.semantic_nc = 35 # label_nc + unknown
@@ -322,7 +323,7 @@ class GTAVToCityscapesDataset2(torch.utils.data.Dataset):
 
     def transforms(self, image, label, image2):
         # resize
-        new_width, new_height = (int(self.opt.load_size / self.opt.aspect_ratio), int(self.opt.load_size / self.opt.aspect_ratio))
+        new_width, new_height = (int(self.opt.load_size / self.opt.aspect_ratio), self.opt.load_size)
         image = TR.functional.resize(image, (new_width, new_height), Image.BICUBIC)
         image2 = TR.functional.resize(image2, (new_width, new_height), Image.BICUBIC)
         label = TR.functional.resize(label, (new_width, new_height), Image.NEAREST)
