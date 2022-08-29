@@ -690,6 +690,8 @@ class WaveletDiscriminator(nn.Module):
             second_dimension = 4
         elif opt.dataset_mode == 'gtavtocityscapes':
             second_dimension = 2
+        if opt.crop:
+            second_dimension = 4
 
 
         self.final_linear = nn.Sequential(
