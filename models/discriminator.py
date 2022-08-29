@@ -692,6 +692,7 @@ class WaveletDiscriminator(nn.Module):
             second_dimension = 2
         if opt.crop:
             second_dimension = 4
+        print("second dimension",second_dimension)
 
 
         self.final_linear = nn.Sequential(
