@@ -132,11 +132,6 @@ class ResnetBlock_with_SPADE(nn.Module):
 
     def forward(self, x, seg, edges = None):
 
-        _ = seg.shape[1]
-        print(_)
-        asd
-
-
         if self.learned_shortcut:
             if self.add_edges:
                 edges = F.interpolate(edges, size=x.shape[-2:])
