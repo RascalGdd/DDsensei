@@ -14,6 +14,8 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
 
         opt.load_size =  512 if for_metrics else 512
         opt.crop_size =  512 if for_metrics else 512
+        if opt.crop:
+            opt.crop_size = 256
         opt.label_nc = 34
         opt.contain_dontcare_label = True
         opt.semantic_nc = 35 # label_nc + unknown
