@@ -323,6 +323,7 @@ class UnconditionalDiscriminator(nn.Module):
             )
 
     def forward(self, input):
+        print("!!!",input.shape)
         out = self.convs(input)
 
         batch, channel, height, width = out.shape
