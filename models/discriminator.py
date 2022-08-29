@@ -573,6 +573,8 @@ class EqualLinear(nn.Module):
 
     def forward(self, input):
         if self.activation:
+            print("input",input.shape)
+            print(self.weight * self.scale)
             out = F.linear(input, self.weight * self.scale)
             out = fused_leaky_relu(out, self.bias * self.lr_mul)
 
@@ -689,7 +691,7 @@ class WaveletDiscriminator(nn.Module):
         elif opt.dataset_mode == 'ade20k':
             second_dimension = 4
         elif opt.dataset_mode == 'gtavtocityscapes':
-            second_dimension = 2
+            second_dimension = 4
         if opt.crop:
             second_dimension = 4
         print("second dimension",second_dimension)
