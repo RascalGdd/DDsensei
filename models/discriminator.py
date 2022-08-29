@@ -236,7 +236,6 @@ class StyleGAN2Discriminator(nn.Module):
 
     def forward(self, input, get_minibatch_features=False):
         if "patch" in self.opt.netDu and self.opt.Du_patch_size is not None:
-            print(input.size())
             h, w = input.size(2), input.size(3)
             y = torch.randint(h - self.opt.Du_patch_size, ())
             x = torch.randint(w - self.opt.Du_patch_size, ())
@@ -323,7 +322,7 @@ class UnconditionalDiscriminator(nn.Module):
             )
 
     def forward(self, input):
-        print("!!!",input.shape)
+
         out = self.convs(input)
 
         batch, channel, height, width = out.shape
