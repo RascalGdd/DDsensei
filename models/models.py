@@ -76,7 +76,7 @@ class Unpaired_model(nn.Module):
             self.netD_ori = discriminators.OASIS_Discriminator(opt)
             if opt.netDu == 'wavelet':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
-            if opt.netDu == 'wavelet_decoder':
+            elif opt.netDu == 'wavelet_decoder':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
                 self.wavelet_decoder = discriminators.Wavelet_decoder(opt)
             else :
