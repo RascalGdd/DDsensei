@@ -28,6 +28,11 @@ miou_computer = miou_pytorch(opt,dataloader_val)
 kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 
+if opt.crop:
+    opt.crop_size = 256
+    opt.load_size = 286
+    opt.aspect_ratio = 1.0
+
 #--- create models ---#
 model = models.Unpaired_model(opt,cfg)
 model = models.put_on_multi_gpus(model, opt)
