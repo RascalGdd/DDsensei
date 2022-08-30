@@ -64,9 +64,14 @@ for epoch in range(start_epoch, opt.num_epochs):
             image, image2, label = models.preprocess_input2(opt, data_i)
         else:
             image, image2, label = models.preprocess_input3(opt, data_i)
-        print("1",image.shape)
-        print("2", image2.shape)
-        print("3", label.shape)
+
+        if cur_iter % opt.freq_save_latest == 0:
+            utils.save_networks(opt, cur_iter, model, latest=True)
+        if cur_iter % opt.freq_fid == 0 and cur_iter > 0:
+            is_best = fid_computer.update(model, cur_iter)
+            if is_best:
+                utils.save_networks(opt, cur_iter, model, best=True)
+            _ = miou_computer.update(model,cur_iter)
 
         # if cur_iter <= 80000:
         # model.module.netG.zero_grad()
