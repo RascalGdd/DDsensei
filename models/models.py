@@ -197,10 +197,8 @@ class Unpaired_model(nn.Module):
 
         if mode == "losses_Du_usis":
             loss_Du = 0
-            print("label",label.shape)
             with torch.no_grad():
                 fake = self.netG(label,edges = edges)
-            print("fake",fake.shape)
             output_Du_fake = self.netDu(fake)
             loss_Du_fake = self.criterionGAN(output_Du_fake, False).mean()
             loss_Du += loss_Du_fake
