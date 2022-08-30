@@ -22,9 +22,9 @@ def get_dataloader():
         break
     # input_label = torch.FloatTensor(2, 35, 256, 256).zero_()
     # input_semantics = input_label.scatter_(1, k, 1.0)
-    print("cropdataset prepared!")
-    print("input label size: {}".format(k.shape))
-    print("input image size: {}".format(j.shape))
-    print("input image2 size: {}".format(m.shape))
+    # print("cropdataset prepared!")
+    # print("input label size: {}".format(k.shape))
+    # print("input image size: {}".format(j.shape))
+    # print("input image2 size: {}".format(m.shape))
     return loader
 

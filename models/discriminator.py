@@ -322,7 +322,6 @@ class UnconditionalDiscriminator(nn.Module):
             )
 
     def forward(self, input):
-        print("!!!")
 
         out = self.convs(input)
 
@@ -703,8 +702,6 @@ class WaveletDiscriminator(nn.Module):
         )
 
     def forward(self, input,for_features = False):
-        print("input",input.shape)
-
 
         input = self.dwt(input)
         out = None
