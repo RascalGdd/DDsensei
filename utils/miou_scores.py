@@ -40,9 +40,8 @@ class miou_pytorch():
                     generated = netEMA(label,edges=edges)
                 image_saver(label, generated, data_i["name"])
 
-            if self.opt.crop:
-                answer = deeplab_v2_miou(self.opt.results_dir, self.opt.name, str(current_iter))
-            elif self.opt.dataset_mode == "ade20k":
+
+            if self.opt.dataset_mode == "ade20k":
                 answer = upernet101_miou(self.opt.results_dir, self.opt.name, str(current_iter))
             elif self.opt.dataset_mode == "cityscapes":
                 answer = drn_105_d_miou(self.opt.results_dir, self.opt.name, str(current_iter))
