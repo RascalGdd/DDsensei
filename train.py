@@ -65,10 +65,10 @@ for epoch in range(start_epoch, opt.num_epochs):
         else:
             image, image2, label = models.preprocess_input3(opt, data_i)
 
-        for m in dataloader_val:
-            print("1", m["label"].shape)
-            print("2", m["image"].shape)
-            break
+        # for m in dataloader_val:
+        #     print("1", m["label"].shape)
+        #     print("2", m["image"].shape)
+        #     break
 
 
 
@@ -110,15 +110,15 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerDu.step()
 
 
-        if True:
-            utils.save_networks(opt, cur_iter, model, latest=True)
-        if True:
-            is_best = fid_computer.update(model, cur_iter)
-            if is_best:
-                utils.save_networks(opt, cur_iter, model, best=True)
-            _ = miou_computer.update(model,cur_iter)
-            print("no problem now")
-            asd
+        # if True:
+        #     utils.save_networks(opt, cur_iter, model, latest=True)
+        # if True:
+        #     is_best = fid_computer.update(model, cur_iter)
+        #     if is_best:
+        #         utils.save_networks(opt, cur_iter, model, best=True)
+        #     _ = miou_computer.update(model,cur_iter)
+        #     print("no problem now")
+        #     asd
 
 
 
