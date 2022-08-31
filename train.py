@@ -110,9 +110,9 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerDu.step()
 
 
-        if cur_iter % opt.freq_save_latest == 0:
+        if True:
             utils.save_networks(opt, cur_iter, model, latest=True)
-        if cur_iter % opt.freq_fid == 0:
+        if True:
             is_best = fid_computer.update(model, cur_iter)
             if is_best:
                 utils.save_networks(opt, cur_iter, model, best=True)
