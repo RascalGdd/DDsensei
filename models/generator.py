@@ -1003,7 +1003,7 @@ class ResidualWaveletGenerator_1(nn.Module):
         ch = opt.channels_G
         self.channels = [4*16*ch, 4*16*ch, 4*16*ch, 4*8*ch, 4*4*ch, 4*2*ch, 4*1*ch]
 
-        self.init_W, self.init_H = self.compute_latent_vector_size(opt)
+        # self.init_W, self.init_H = self.compute_latent_vector_size(opt)
 
         self.conv_img = ToRGB_wavelet(in_channel=self.channels[-1],upsample = False)
         self.iwt = InverseHaarTransform(3)
@@ -1011,6 +1011,7 @@ class ResidualWaveletGenerator_1(nn.Module):
         self.up = nn.Upsample(scale_factor=2)
         self.up_residual = IWT_Upsample_HWT(factor=2,mode='bilinear')
         self.body = nn.ModuleList([])
+        self.num_res_blocks = opt.num_res_blocks
         for i in range(len(self.channels)-1):
             self.body.append(WaveletBlock_with_IWT_SPADE_HWT(self.channels[i], self.channels[i+1], opt))
 
@@ -1021,12 +1022,24 @@ class ResidualWaveletGenerator_1(nn.Module):
 
 #        self.constant_input = ConstantInput(self.channels[0],(self.init_W, self.init_H))
 
-    def compute_latent_vector_size(self, opt):
-        w = opt.crop_size // (2**(opt.num_res_blocks-1))
-        h = round(w / opt.aspect_ratio)
-        return h//2, w//2
+    # def compute_latent_vector_size(self, opt):
+    #     w = self.crop_size // (2**(opt.num_res_blocks-1))
+    #     h = round(w // self.opt.aspect_ratio)
+    #     return h//2, w//2
+
+# return h=4, w=8 for 256,512
+# return h=4, w=4 for 256,256
 
     def forward(self, input, z=None,edges = None):
+
+        h = input.shape[-2]
+        w = input.shape[-1]
+        w = w // (2**(self.num_res_blocks-1))
+        h = h // (2**(self.num_res_blocks-1))
+        self.init_W, self.init_H = h, w
+        print("h",h)
+        print("w",w)
+
         seg = input
         if self.opt.gpu_ids != "-1":
             seg.cuda()

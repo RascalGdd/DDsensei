@@ -16,6 +16,11 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
         opt.crop_size2 =  512 if for_metrics else 512
         opt.aspect_ratio2 = 2.0
 
+        if not opt.crop:
+            opt.load_size = 512 if for_metrics else 512
+            opt.crop_size = 512 if for_metrics else 512
+            opt.aspect_ratio = 2.0
+
 
         # if opt.crop:
         #     opt.crop_size = 256
@@ -161,7 +166,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
 
     def transforms(self, image, label):
         # resize
-        new_width, new_height = (int(self.opt.load_size2 / self.opt.aspect_ratio2),int(self.opt.load_size2/2.0))
+        new_width, new_height = (int(self.opt.load_size2 / self.opt.aspect_ratio2), self.opt.load_size2)
         image = TR.functional.resize(image, (new_width, new_height), Image.BICUBIC)
         label = TR.functional.resize(label, (new_width, new_height), Image.NEAREST)
         # flip
