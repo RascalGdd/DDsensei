@@ -1036,7 +1036,7 @@ class ResidualWaveletGenerator_1(nn.Module):
         w = input.shape[-1]
         w = w // (2**(self.num_res_blocks-1))
         h = h // (2**(self.num_res_blocks-1))
-        self.init_W, self.init_H = h, w
+        self.init_W, self.init_H = h//2, w//2
         print("h",h)
         print("w",w)
 
