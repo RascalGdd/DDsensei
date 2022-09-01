@@ -9,6 +9,7 @@ import torch
 import torch.utils.data
 import PIL.Image as Image
 import cv2
+import torchvision.transforms as TR
 
 def mat2tensor(mat):
     t = torch.from_numpy(mat).float()
@@ -89,13 +90,17 @@ class ImageDataset(torch.utils.data.Dataset):
         pass
 
     def _load_img(self, path):
+        transforms = TR.Compose([TR.ToTensor(), TR.Resize([526, 957])])
         if self.for_label:
-            return np.array(Image.open(path))
+            a = transforms(Image.open(path))
+            a = a * 255.
+            a = a.squeeze()
+            a = np.array(a)
+            return a
         else:
             a = np.clip(cv2.imread(str(path)).astype(np.float32) / 255.0, 0.0, 1.0)[:, :, :3]
             a = cv2.resize(a, [957, 526])
             # a = np.transpose(a, (2, 0, 1))
-            # print(a.shape)
             return a
 
 
