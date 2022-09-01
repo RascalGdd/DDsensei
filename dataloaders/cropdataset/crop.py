@@ -92,9 +92,7 @@ class ImageDataset(torch.utils.data.Dataset):
     def _load_img(self, path):
         transforms = TR.Compose([TR.ToTensor(), TR.Resize([526, 957])])
         if self.for_label:
-            a = transforms(Image.open(path))
-            a = a * 255.
-            a = a.squeeze()
+            a = Image.open(path).resize((957, 526))
             a = np.array(a)
             return a
         else:
