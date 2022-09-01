@@ -40,7 +40,7 @@ class PairedDataset(torch.utils.data.Dataset):
 		img_fake = torch.squeeze(self._source_dataset[src_id].crop(*s[1:]).img)
 		img_fake = img_fake.unsqueeze(dim=0)
 		img_real = torch.squeeze(self._target_dataset[dst_id].crop(*t[1:]).img)
-		img_fake2 = torch.squeeze(self._source_dataset2[src_id2].crop(*t[1:]).img)
+		img_fake2 = torch.squeeze(self._source_dataset2[src_id2].crop(*s2[1:]).img)
 		img_fake = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_fake).type(torch.int64)
 		img_real = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_real)
 		img_fake2 = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_fake2)
