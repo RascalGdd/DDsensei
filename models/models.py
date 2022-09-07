@@ -76,9 +76,6 @@ class Unpaired_model(nn.Module):
             self.netD_ori = discriminators.OASIS_Discriminator(opt)
             if opt.netDu == 'wavelet':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
-            elif opt.netDu == 'wavelet_decoder':
-                self.netDu = discriminators.WaveletDiscriminator(opt)
-                self.wavelet_decoder = discriminators.Wavelet_decoder(opt)
             else :
                 self.netDu = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
@@ -199,7 +196,6 @@ class Unpaired_model(nn.Module):
             loss_Du = 0
             with torch.no_grad():
                 fake = self.netG(label,edges = edges)
-            # print("fake",fake.shape)
             output_Du_fake = self.netDu(fake)
             loss_Du_fake = self.criterionGAN(output_Du_fake, False).mean()
             loss_Du += loss_Du_fake
@@ -207,27 +203,6 @@ class Unpaired_model(nn.Module):
             output_Du_real = self.netDu(image)
             loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
             loss_Du += loss_Du_real
-
-            return loss_Du, [loss_Du_fake,loss_Du_real]
-
-        if mode == "losses_Du_usis_decoder":
-            loss_Du = 0
-            with torch.no_grad():
-                fake = self.netG(label,edges = edges)
-            output_Du_fake = self.netDu(fake)
-            loss_Du_fake = self.criterionGAN(output_Du_fake, False).mean()
-            loss_Du += loss_Du_fake
-
-            output_Du_real = self.netDu(image)
-            loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
-            loss_Du += loss_Du_real
-
-            losses_decoder = 0
-            features = self.netDu(image, for_features=True)
-            decoder_output = self.wavelet_decoder(features[0], features[1], features[2], features[3], features[4], features[5])
-            decoder_loss = nn.L1Loss()
-            losses_decoder += decoder_loss(image, decoder_output).mean()
-            loss_Du += losses_decoder
 
             return loss_Du, [loss_Du_fake,loss_Du_real]
 
@@ -347,14 +322,15 @@ class Unpaired_model(nn.Module):
                 fake = self.netG(label,edges = edges)
             realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=True)
 
-            # pred_labels = {}  # for adaptive backprop
+            pred_labels = {}  # for adaptive backprop
             for i, rm in enumerate(realism_maps):
 
-                # if rm is None:
-                #     continue
-                #
-                # pred_labels[i] = [(rm.detach() < 0.5).float().reshape(1, -1)]
-                # pass
+                if rm is None:
+                    continue
+
+                pred_labels[i] = [(rm.detach() < 0.5).float().reshape(1, -1)]
+                pass
+
 
                 loss_D_fake, _ = tee_loss(loss_D_fake, self.gan_loss.forward_fake(rm).mean())
             del rm
@@ -365,23 +341,23 @@ class Unpaired_model(nn.Module):
 
             for i, rm in enumerate(realism_maps):
 
-                # if rm is None:
-                #     continue
-                #
-                # if i in pred_labels:
-                #     # predicted correctly, here real as real
-                #     pred_labels[i].append((rm.detach() > 0.5).float().reshape(1, -1))
-                # else:
-                #     pred_labels[i] = [(rm.detach() > 0.5).float().reshape(1, -1)]
-                #     pass
-                #
+                if rm is None:
+                    continue
+
+                if i in pred_labels:
+                    # predicted correctly, here real as real
+                    pred_labels[i].append((rm.detach() > 0.5).float().reshape(1, -1))
+                else:
+                    pred_labels[i] = [(rm.detach() > 0.5).float().reshape(1, -1)]
+                    pass
+
 
                 loss_D_real += self.gan_loss.forward_real(rm).mean()
             del rm
             del realism_maps
             loss_D = loss_D_real + loss_D_fake
 
-            # self.adaptive_backprop.update(pred_labels)
+            self.adaptive_backprop.update(pred_labels)
 
             return loss_D, [loss_D_fake, loss_D_real]
 
@@ -948,19 +924,3 @@ def preprocess_input2(opt, data):
         input_label = torch.FloatTensor(bs, nc, h, w).zero_()
     input_semantics = input_label.scatter_(1, label_map, 1.0)
     return data['image'],data['image2'], input_semantics
-
-def preprocess_input3(opt, data):
-    data[0] = data[0].long()
-    if opt.gpu_ids != "-1":
-        data[0] = data[0].cuda()
-        data[1] = data[1].cuda()
-        data[2] = data[2].cuda()
-    label_map = data[0]
-    bs, _, h, w = label_map.size()
-    nc = opt.semantic_nc
-    if opt.gpu_ids != "-1":
-        input_label = torch.cuda.FloatTensor(bs, nc, h, w).zero_()
-    else:
-        input_label = torch.FloatTensor(bs, nc, h, w).zero_()
-    input_semantics = input_label.scatter_(1, label_map, 1.0)
-    return data[1], data[2], input_semantics
