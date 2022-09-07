@@ -714,7 +714,7 @@ class WaveletDiscriminator(nn.Module):
         )
 
     def forward(self, input,for_features = False):
-        # input = stack(input)
+        input = stack(input)
 
         input = self.dwt(input)
         out = None
