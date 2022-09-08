@@ -83,7 +83,7 @@ class Unpaired_model(nn.Module):
                 self.netDu = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
             self.featmatch = torch.nn.MSELoss()
-        self.adaptive_backprop = AdaptiveBackprop(10, "cuda", 0.6)
+        # self.adaptive_backprop = AdaptiveBackprop(10, "cuda", 0.6)
         self.gan_loss = LSLoss()
         self.print_parameter_count()
         self.init_networks()
@@ -337,9 +337,9 @@ class Unpaired_model(nn.Module):
                 loss_G_vgg = None
 
         if mode == "losses_D":
-            run = self.adaptive_backprop.sample()
-            if not any(run):
-                run = True
+            # run = self.adaptive_backprop.sample()
+            # if not any(run):
+            #     run = True
             loss_D = 0
             loss_D_fake = 0
             loss_D_real = 0
