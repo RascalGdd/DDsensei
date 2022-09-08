@@ -98,6 +98,7 @@ class ImageDataset(torch.utils.data.Dataset):
         else:
             a = np.clip(cv2.imread(str(path)).astype(np.float32) / 255.0, 0.0, 1.0)[:, :, :3]
             a = cv2.resize(a, [957, 526])
+            a = (a - 0.5) / 0.5
             # a = np.transpose(a, (2, 0, 1))
             return a
 

@@ -6,12 +6,28 @@ from tqdm import tqdm
 import numpy as np
 import torch
 
-from batch_types import JointEPEBatch
-from sample_matches import load_crops
-from filter import load_matching_crops
+from dataloaders.cropdataset_kvd.batch_types import JointEPEBatch
+from dataloaders.cropdataset_kvd.sample_matches import load_crops
+from dataloaders.cropdataset_kvd.filter import load_matching_crops
 import torchvision.transforms as tf
 from torchvision.transforms.functional import InterpolationMode
-from cfg import *
+from dataloaders.cropdataset_kvd.cfg2 import *
+
+def process_path(path: Path):
+	city = str(path).split("/")[-2]
+	name = str(path).split("/")[-1]
+	cut_idx = name.find("gtFine")
+	name2 = name[:cut_idx] + "leftImg8bit.png"
+
+	if "train" in str(path):
+		path_cityscape_images = Path(path_lab_image / "train" / city / name2)
+	elif "val" in str(path):
+		path_cityscape_images = Path(path_lab_image / "val" / city / name2)
+	else:
+		print("file path not correct")
+		return
+
+	return str(path_cityscape_images)
 
 
 class PairedDataset(torch.utils.data.Dataset):
@@ -32,20 +48,19 @@ class PairedDataset(torch.utils.data.Dataset):
 		t = self.dst_crops[jdx]
 
 		src_id = self._source_dataset.get_id(s[0])
+		# print("src_id",src_id)
+
 		dst_id = self._target_dataset.get_id(t[0])
 		src_id2 = self._source_dataset2.get_id(s2[0])
-		# print(src_id)
-		# print(t[0])
-		# print(dst_id)
-		# print(src_id2)
 
 		img_fake = torch.squeeze(self._source_dataset[src_id].crop(*s[1:]).img)
-		img_fake = img_fake.unsqueeze(dim=0)
 		img_real = torch.squeeze(self._target_dataset[dst_id].crop(*t[1:]).img)
+		img_real = img_real.unsqueeze(dim=0)
 		img_fake2 = torch.squeeze(self._source_dataset2[src_id2].crop(*s2[1:]).img)
-		img_fake = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_fake).type(torch.int64)
-		img_real = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_real)
-		img_fake2 = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_fake2)
+		img_fake2 = img_fake2.unsqueeze(dim=0)
+		img_fake = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_fake)
+		img_real = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_real).type(torch.int64)
+		img_fake2 = tf.Resize([256, 256], interpolation=InterpolationMode.NEAREST)(img_fake2).type(torch.int64)
 
 		# return JointEPEBatch(self._source_dataset[src_id].crop(*s[1:]), self._target_dataset[dst_id].crop(*t[1:]))
 		return img_fake, img_real, img_fake2
@@ -76,7 +91,9 @@ class MatchedCrops(PairedDataset):
 		valid_ids = []
 		for i, (sc, dc) in tqdm(enumerate(zip(self.src_crops, self.dst_crops))):
 			sc2 = sc
-			sc = ((str(path_folder_fake_label)+"\\"+sc[0].split("\\")[-1]),sc[1],sc[2],sc[3],sc[4])
+			sc = (process_path(Path(dc[0])), dc[1], dc[2], dc[3], dc[4])
+
+			# sc = ((str(path_folder_fake)+"\\"+sc[0].split("\\")[-1]),sc[1],sc[2],sc[3],sc[4])
 			# sc = ((str(path_folder_fake_label) + "/" + sc[0].split("/")[-1]), sc[1], sc[2], sc[3], sc[4])
 			if self._source_dataset.get_by_path(sc[0]) is not None:
 				valid_src_crops.append(sc)
@@ -85,10 +102,6 @@ class MatchedCrops(PairedDataset):
 				valid_ids.append(i)
 				pass
 			pass
-		# print("label", valid_src_crops)
-		# print("real", valid_dst_crops)
-		# print("fake", valid_src_crops2)
-		# print(valid_ids)
 
 		print('Done to {} crops.'.format(len(valid_ids)))
 
@@ -113,8 +126,6 @@ class MatchedCrops(PairedDataset):
 			p   = random.random()
 			idx = np.min(np.nonzero(p<self._cumsum)[0])
 			pass
-			# print("idx",idx)
-
 		return self._get_cropped_items(idx, idx)
 		# except KeyError:
 		# 	return self.__getitem__(random.randint(0, len(self.src_crops)-1))

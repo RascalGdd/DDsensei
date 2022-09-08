@@ -3,14 +3,14 @@ from pathlib import Path
 import os
 import faiss
 import numpy as np
-from cfg import *
+from dataloaders.cropdataset_kvd.cfg2 import *
 
 if __name__ == '__main__':
 
     out = match_path
     file_src = fake_feature_path
     file_dst = real_feature_path
-    k = 10
+    k = 1
 
 
     features_ref = np.load(file_src)['crops'].astype(np.float32)

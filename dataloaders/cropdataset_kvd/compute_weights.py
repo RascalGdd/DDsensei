@@ -4,14 +4,14 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from filter import load_matching_crops
-from cfg import *
+from dataloaders.cropdataset_kvd.filter import load_matching_crops
+from dataloaders.cropdataset_kvd.cfg2 import *
 
 
-width = 957
-height = 526
+width = 752
+height = 408
 
-src_crops,_ = load_matching_crops(matched_crop_path)
+src_crops,_ = load_matching_crops(matched_crop_path_kvd)
 
 d = np.zeros((height, width), dtype=np.int32)
 print('Computing density...')

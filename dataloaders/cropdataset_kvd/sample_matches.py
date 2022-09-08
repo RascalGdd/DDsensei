@@ -7,8 +7,8 @@ from imageio import imwrite
 import numpy as np
 import torch
 from torchvision.utils import make_grid
-from crop import *
-from cfg import *
+from dataloaders.cropdataset_kvd.crop import *
+from dataloaders.cropdataset_kvd.cfg2 import *
 
 
 # for each threshold,

@@ -6,7 +6,7 @@ import numpy as np
 from tqdm import tqdm
 
 from sample_matches import load_crops
-from cfg import *
+from dataloaders.cropdataset_kvd.cfg2 import *
 
 
 def load_matching_crops(path):
@@ -59,7 +59,6 @@ def load_and_filter_matching_crops(knn_path, src_crop_path, dst_crop_path, max_d
 	data     = np.load(knn_path)
 	dst_distances = data['dist'] # may need to add more samples
 	dst_indices   = data['ind']
-	print(dst_distances)
 
 	# logger.debug(f'  Found {dst_distances.shape[0]} source crops with {dst_distances.shape[1]} neighbours each.')
 
@@ -67,6 +66,7 @@ def load_and_filter_matching_crops(knn_path, src_crop_path, dst_crop_path, max_d
 	all_dst_crops = load_crops(dst_crop_path)
 
 	# take only patches with small distance
+	# print((dst_distances < max_dist)[0])
 	src_ids, knn = np.nonzero(dst_distances < max_dist)
 
 	filtered_src_crops = []

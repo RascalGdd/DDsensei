@@ -1,30 +1,35 @@
 import os
 import pandas
 from pathlib import Path
-from crop import *
+from dataloaders.cropdataset_kvd.crop import *
 from torch.utils.data import DataLoader
 import torch
 import numpy as np
-from vgg16 import *
+# from vgg16 import *
 from tqdm import tqdm
-from cfg import *
+from dataloaders.cropdataset_kvd.cfg2 import *
+import torchvision.transforms as TR
+import torch.nn as nn
+from torchvision.transforms.functional import InterpolationMode
+
 
 def seed_worker(id):
     np.random.seed(torch.initial_seed() % np.iinfo(np.int32).max)
     pass
+
 
 if __name__ == '__main__':
 
 
     device = torch.device('cuda')
 
-    network = VGG16(False, padding='none').to(device)
-    extract   = lambda img: network.fw_relu(img, 13)[-1]
+    # network = VGG16(False, padding='none').to(device)
+    # extract   = lambda img: network.fw_relu(img, 13)[-1]
     crop_size = 196 # VGG-16 receptive field at relu 5-3
-    dim       = 512 # channel width of VGG-16 at relu 5-3
+    dim       = 256 # channel width of VGG-16 at relu 5-3
     num_crops = 15
 
-    dataset = ImageDataset(file_list_fake)
+    dataset = ImageDataset(file_list_fake, for_label=True)
     loader  = DataLoader(dataset,
             batch_size=1, shuffle=True,
             num_workers=1, pin_memory=True, drop_last=False, worker_init_fn=seed_worker, collate_fn=ImageBatch.collate_fn)
@@ -40,7 +45,7 @@ if __name__ == '__main__':
     m = torch.cat(m, 0).mean(dim=0)
     s = torch.cat(s, 0).mean(dim=0)
 
-    network.set_mean_std(m[0], m[1], m[2], s[0], s[1], s[2])
+    # network.set_mean_std(m[0], m[1], m[2], s[0], s[1], s[2])
 
     loader = torch.utils.data.DataLoader(dataset,
                                          batch_size=1, shuffle=False,
@@ -73,16 +78,24 @@ if __name__ == '__main__':
                     c0 = c0s[j].item()
                     r1 = r0 + crop_size
                     c1 = c0 + crop_size
-                    samples.append(batch.img[0, :, r0:r1, c0:c1].reshape(1, 3, crop_size, crop_size))
+
+                    # q = batch.img[0, 0, r0:r1, c0:c1].reshape(1, 1, crop_size, crop_size)
+                    # q = TR.Resize([16, 16])(q)
+
+
+
+                    samples.append(nn.Flatten()(TR.Resize([16, 16],interpolation=InterpolationMode.NEAREST)(batch.img[0, 0, r0:r1, c0:c1].reshape(1,1,crop_size, crop_size))))
+                    # samples = TR.Resize([16, 16], interpolation=InterpolationMode.NEAREST)(samples)
+                    # samples = nn.Flatten()(samples)
                     log.write(f'{ip},{batch.path[0]},{r0},{r1},{c0},{c1}\n')
                     ip += 1
                     pass
 
                 samples = torch.cat(samples, 0)
-                samples = samples.to(device, non_blocking=True)
-                f = extract(samples)
+                # samples = samples.to(device, non_blocking=True)
+                # f = extract(samples)
 
-                features[ip - num_crops:ip, :] = f.cpu().numpy().astype(np.float16).reshape(num_crops, dim)
+                features[ip - num_crops:ip, :] = samples.cpu().numpy().astype(np.float16).reshape(num_crops, dim)
                 pass
             pass
         pass
@@ -90,10 +103,9 @@ if __name__ == '__main__':
     print('Saving features.')
     np.savez_compressed(out_dir / f'crop_fake', crops=features)
     pass
+    print(features)
 
-
-
-    dataset = ImageDataset(file_list_real)
+    dataset = ImageDataset(file_list_real, for_label=True)
     loader  = DataLoader(dataset,
             batch_size=1, shuffle=True,
             num_workers=1, pin_memory=True, drop_last=False, worker_init_fn=seed_worker, collate_fn=ImageBatch.collate_fn)
@@ -109,7 +121,7 @@ if __name__ == '__main__':
     m = torch.cat(m, 0).mean(dim=0)
     s = torch.cat(s, 0).mean(dim=0)
 
-    network.set_mean_std(m[0], m[1], m[2], s[0], s[1], s[2])
+    # network.set_mean_std(m[0], m[1], m[2], s[0], s[1], s[2])
 
     loader = torch.utils.data.DataLoader(dataset,
                                          batch_size=1, shuffle=False,
@@ -142,20 +154,28 @@ if __name__ == '__main__':
                     c0 = c0s[j].item()
                     r1 = r0 + crop_size
                     c1 = c0 + crop_size
-                    samples.append(batch.img[0, :, r0:r1, c0:c1].reshape(1, 3, crop_size, crop_size))
+
+                    # q = batch.img[0, 0, r0:r1, c0:c1].reshape(1, 1, crop_size, crop_size)
+                    # q = TR.Resize([16, 16])(q)
+
+
+
+                    samples.append(nn.Flatten()(TR.Resize([16, 16],interpolation=InterpolationMode.NEAREST)(batch.img[0, 0, r0:r1, c0:c1].reshape(1,1,crop_size, crop_size))))
+                    # samples = TR.Resize([16, 16], interpolation=InterpolationMode.NEAREST)(samples)
+                    # samples = nn.Flatten()(samples)
                     log.write(f'{ip},{batch.path[0]},{r0},{r1},{c0},{c1}\n')
                     ip += 1
                     pass
 
                 samples = torch.cat(samples, 0)
-                samples = samples.to(device, non_blocking=True)
-                f = extract(samples)
+                # samples = samples.to(device, non_blocking=True)
+                # f = extract(samples)
 
-                features[ip - num_crops:ip, :] = f.cpu().numpy().astype(np.float16).reshape(num_crops, dim)
+                features[ip - num_crops:ip, :] = samples.cpu().numpy().astype(np.float16).reshape(num_crops, dim)
                 pass
             pass
         pass
-
+    print(features)
     print('Saving features.')
     np.savez_compressed(out_dir / f'crop_real', crops=features)
     pass
