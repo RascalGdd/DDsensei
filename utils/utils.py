@@ -187,7 +187,10 @@ def update_EMA(model, cur_iter, dataloader, opt, force_run_stats=False):
         with torch.no_grad():
             num_upd = 0
             for i, data_i in enumerate(dataloader):
-                image, label, image2 = models.preprocess_input2(opt, data_i)
+                if opt.crop:
+                    image, image2, label = models.preprocess_input3(opt,data_i)
+                else:
+                    image,label = models.preprocess_input(opt,data_i)
                 fake = model.module.netEMA(label,edges = model.module.compute_edges(image))
                 num_upd += 1
                 if num_upd > 50:
@@ -373,8 +376,3 @@ def labelcolormap(N):
             cmap[i, 1] = g
             cmap[i, 2] = b
     return cmap
-
-
-
-
-
