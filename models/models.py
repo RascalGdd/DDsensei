@@ -15,6 +15,7 @@ from models.discriminator_losses import LSLoss
 from models.perceptual_losses import LPIPSLoss as lp
 from models.backprop import AdaptiveBackprop
 
+run = [True] * 10
 vgg = vg.VGG16().cuda()
 config_path ="/no_backups/s1422/DDsensei/train_pfd2cs_ie2.yaml"
 with open(config_path) as file:
@@ -82,7 +83,7 @@ class Unpaired_model(nn.Module):
                 self.netDu = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
             self.featmatch = torch.nn.MSELoss()
-        # self.adaptive_backprop = AdaptiveBackprop(10, "cuda", 0.6)
+        self.adaptive_backprop = AdaptiveBackprop(10, "cuda", 0.6)
         self.gan_loss = LSLoss()
         self.print_parameter_count()
         self.init_networks()
@@ -198,7 +199,6 @@ class Unpaired_model(nn.Module):
             loss_Du = 0
             with torch.no_grad():
                 fake = self.netG(label,edges = edges)
-            # print("fake",fake.shape)
             output_Du_fake = self.netDu(fake)
             loss_Du_fake = self.criterionGAN(output_Du_fake, False).mean()
             loss_Du += loss_Du_fake
@@ -336,6 +336,9 @@ class Unpaired_model(nn.Module):
                 loss_G_vgg = None
 
         if mode == "losses_D":
+            run = self.adaptive_backprop.sample()
+            if not any(run):
+                run = True
             loss_D = 0
             loss_D_fake = 0
             loss_D_real = 0
@@ -960,20 +963,3 @@ def preprocess_input3(opt, data):
         input_label = torch.FloatTensor(bs, nc, h, w).zero_()
     input_semantics = input_label.scatter_(1, label_map, 1.0)
     return data[1], data[2], input_semantics
-
-def preprocess_input_kvd(opt, data):
-    data[1] = data[1].long()
-    data[2] = data[2].long()
-    if opt.gpu_ids != "-1":
-        data[0] = data[0].cuda()
-        data[1] = data[1].cuda()
-        data[2] = data[2].cuda()
-    label_map = data[2]
-    bs, _, h, w = label_map.size()
-    nc = opt.semantic_nc
-    if opt.gpu_ids != "-1":
-        input_label = torch.cuda.FloatTensor(bs, nc, h, w).zero_()
-    else:
-        input_label = torch.FloatTensor(bs, nc, h, w).zero_()
-    input_semantics = input_label.scatter_(1, label_map, 1.0)
-    return data[0], input_semantics

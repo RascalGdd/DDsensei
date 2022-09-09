@@ -3,9 +3,7 @@ import models.losses as losses
 import models.models as models
 import dataloaders.dataloaders as dataloaders
 import dataloaders.cropdataset.final_data as final_data
-# import dataloaders.cropdataset_kvd.final_data as final_data_kvd
 import utils.utils as utils
-# from utils.mmd import MMD_computer
 from utils.fid_scores import fid_pytorch
 from utils.miou_scores import miou_pytorch
 from models.models import cfg
@@ -50,20 +48,6 @@ def loopy_iter(dataset):
         for item in dataset :
             yield item
 
-if opt.kvd:
-    print("kvd mode!")
-    num_samples = 1000
-    total_mmd_loss = 0
-    dataloader_kvd = final_data_kvd.get_dataloader_kvd()
-    for i, data_i in enumerate(dataloader_kvd):
-        real_img, fake_lab = models.preprocess_input_kvd(opt, data_i)
-        generated = model.module.netG(fake_lab)
-        print("generated shape", generated.shape)
-        print(real_img)
-        total_mmd_loss += MMD_computer()(generated, real_img, "relu53")
-    total_mmd_loss = total_mmd_loss / num_samples
-    print("The KVD is {}".format(total_mmd_loss))
-
 
 #--- the training loop ---#
 already_started = False
@@ -80,8 +64,6 @@ for epoch in range(start_epoch, opt.num_epochs):
             image, image2, label = models.preprocess_input2(opt, data_i)
         else:
             image, image2, label = models.preprocess_input3(opt, data_i)
-
-
 
         # if cur_iter <= 80000:
         # model.module.netG.zero_grad()
@@ -119,22 +101,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_Du.backward()
         # optimizerDe.step()
         optimizerDu.step()
-
-
-        # if True:
-        #     utils.save_networks(opt, cur_iter, model, latest=True)
-        # if True:
-        #     is_best = fid_computer.update(model, cur_iter)
-        #     if is_best:
-        #         utils.save_networks(opt, cur_iter, model, best=True)
-        #     _ = miou_computer.update(model,cur_iter)
-        #     print("no problem now")
-        #     asd
-
-
-
-
-
         #
         # # --- generator psuedo labels updates ---@
         #
@@ -278,4 +244,3 @@ if is_best:
     utils.save_networks(opt, cur_iter, model, best=True)
 
 print("The training has successfully finished")
-
