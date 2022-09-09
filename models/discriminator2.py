@@ -20,18 +20,18 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 logger = logging.getLogger(__name__)
 
 
-def stack(a):
-    B, C, H, W = a.shape[0], a.shape[1], a.shape[2], a.shape[3]
-    size = 2
-    Y = H // size
-    X = W // size
-    m = a[:, :, :Y, :X]
-    n = a[:, :, Y:, :X]
-    q = a[:, :, :Y, X:]
-    p = a[:, :, Y:, X:]
-    a = torch.cat([m, n, p, q])
-
-    return a
+# def stack(a):
+#     B, C, H, W = a.shape[0], a.shape[1], a.shape[2], a.shape[3]
+#     size = 2
+#     Y = H // size
+#     X = W // size
+#     m = a[:, :, :Y, :X]
+#     n = a[:, :, Y:, :X]
+#     q = a[:, :, :Y, X:]
+#     p = a[:, :, Y:, X:]
+#     a = torch.cat([m, n, p, q])
+#
+#     return a
 
 class DomainNorm2d(nn.Module):
 	def __init__(self, dim):
@@ -295,7 +295,7 @@ class PerceptualDiscEnsemble(DiscriminatorEnsemble):
 
 	def prepare_input(self, *, vgg, img, fix_input, run_discs, **kwargs):
 		""" Applies a VGG to img and returns feature maps from relu layers. """
-		img = stack(img)
+		# img = stack(img)
 
 		if self._log.isEnabledFor(logging.DEBUG):
 			self._log.debug(f'PDE:prepare(i:{img.shape}, fix:{fix_input}, run:{run_discs}, other: {kwargs})')
