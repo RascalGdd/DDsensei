@@ -9,18 +9,6 @@ import random
 from torch.nn import functional as F
 from models.conv2d_gradfix import conv2d_gradfix
 
-# def stack(a):
-#     B, C, H, W = a.shape[0], a.shape[1], a.shape[2], a.shape[3]
-#     size = 2
-#     Y = H // size
-#     X = W // size
-#     m = a[:, :, :Y, :X]
-#     n = a[:, :, Y:, :X]
-#     q = a[:, :, :Y, X:]
-#     p = a[:, :, Y:, X:]
-#     a = torch.cat([m, n, p, q])
-
-    # return a
 
 class Wavelet_decoder(nn.Module):
     def __init__(self, opt, in_channels=3, features=64):
@@ -714,7 +702,6 @@ class WaveletDiscriminator(nn.Module):
         )
 
     def forward(self, input,for_features = False):
-        # input = stack(input)
 
         input = self.dwt(input)
         out = None
