@@ -61,7 +61,8 @@ if opt.kvd:
         print("fake_lab,", fake_lab.shape)
         generated = model.module.netG(fake_lab)
         print("generated shape", generated.shape)
-        print(real_img)
+        print(torch.max(generated))
+        print(torch.min(generated))
         asd
         total_mmd_loss += MMD_computer()(generated, real_img, "relu53")
     total_mmd_loss = total_mmd_loss / num_samples
