@@ -63,7 +63,6 @@ if opt.kvd:
         print("generated shape", generated.shape)
         print(torch.max(generated))
         print(torch.min(generated))
-        asd
         total_mmd_loss += MMD_computer()(generated, real_img, "relu53")
     total_mmd_loss = total_mmd_loss / num_samples
     print("The KVD is {}".format(total_mmd_loss))
