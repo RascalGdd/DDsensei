@@ -11,6 +11,8 @@ import config
 from torchmetrics.image.kid import KernelInceptionDistance
 import matplotlib.pyplot as plt
 import os
+import dataloaders.cropdataset_kvd.final_data as final_data_kvd
+from utils.mmd import MMD_computer
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -47,6 +49,23 @@ def loopy_iter(dataset):
     while True :
         for item in dataset :
             yield item
+
+if opt.kvd:
+    print("kvd mode!")
+    num_samples = 1000
+    total_mmd_loss = 0
+    dataloader_kvd = final_data_kvd.get_dataloader_kvd()
+    for i, data_i in enumerate(dataloader_kvd):
+        real_img, fake_lab = models.preprocess_input_kvd(opt, data_i)
+        print("real_img,",real_img.shape)
+        print("fake_lab,", fake_lab.shape)
+        generated = model.module.netG(fake_lab)
+        print("generated shape", generated.shape)
+        print(real_img)
+        asd
+        total_mmd_loss += MMD_computer()(generated, real_img, "relu53")
+    total_mmd_loss = total_mmd_loss / num_samples
+    print("The KVD is {}".format(total_mmd_loss))
 
 
 #--- the training loop ---#

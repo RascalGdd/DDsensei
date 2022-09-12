@@ -963,3 +963,20 @@ def preprocess_input3(opt, data):
         input_label = torch.FloatTensor(bs, nc, h, w).zero_()
     input_semantics = input_label.scatter_(1, label_map, 1.0)
     return data[1], data[2], input_semantics
+
+def preprocess_input_kvd(opt, data):
+    data[1] = data[1].long()
+    data[2] = data[2].long()
+    if opt.gpu_ids != "-1":
+        data[0] = data[0].cuda()
+        data[1] = data[1].cuda()
+        data[2] = data[2].cuda()
+    label_map = data[2]
+    bs, _, h, w = label_map.size()
+    nc = opt.semantic_nc
+    if opt.gpu_ids != "-1":
+        input_label = torch.cuda.FloatTensor(bs, nc, h, w).zero_()
+    else:
+        input_label = torch.FloatTensor(bs, nc, h, w).zero_()
+    input_semantics = input_label.scatter_(1, label_map, 1.0)
+    return data[0], input_semantics
