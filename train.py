@@ -52,21 +52,22 @@ def loopy_iter(dataset):
 
 if opt.kvd:
     print("kvd mode!")
-    num_samples = 1000
+    num_samples = 30
     total_mmd_loss = 0
     dataloader_kvd = final_data_kvd.get_dataloader_kvd()
     for i, data_i in enumerate(dataloader_kvd):
         real_img, fake_lab = models.preprocess_input_kvd(opt, data_i)
-        print("real_img,",real_img.shape)
-        print("fake_lab,", fake_lab.shape)
+        # print("real_img,",real_img.shape)
+        # print("fake_lab,", fake_lab.shape)
         generated = model.module.netG(fake_lab)
-        print("generated shape", generated.shape)
-        print(torch.max(generated))
-        print(torch.min(generated))
-        asd
+        # print("generated shape", generated.shape)
+        # print(torch.max(generated))
+        # print(torch.min(generated))
         total_mmd_loss += MMD_computer()(generated, real_img, "relu53")
+        print(total_mmd_loss)
     total_mmd_loss = total_mmd_loss / num_samples
     print("The KVD is {}".format(total_mmd_loss))
+asd
 
 
 #--- the training loop ---#
