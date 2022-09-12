@@ -4,7 +4,7 @@ import numpy as np
 from torchvision.models import vgg16
 
 
-# device = "cpu"
+device = "cuda"
 
 # x = torch.randn([1, 3, 128, 64])
 # # x = nn.Flatten()(x)
@@ -53,9 +53,9 @@ def MMD(x, y, kernel):
 
     return torch.mean(XX + YY - 2. * XY)
 
-class Vggextractor():
-    def __init__(self) -> None:
-        # super().__init__()
+class Vggextractor(nn.Module):
+    def __init__(self):
+        super().__init__()
         self.vgg = vgg16(pretrained=True, progress=True).features
         self.relu12 = self.vgg[:4]
         self.relu22 = self.vgg[:9]
@@ -113,7 +113,7 @@ class MMD_loss(nn.Module):
 
 class MMD_computer:
     def __init__(self):
-        self.extractor = Vggextractor()
+        self.extractor = Vggextractor().to(device)
         self.mmd_loss = MMD_loss()
         self.flat = nn.Flatten()
     def __call__(self, x, y, mode):

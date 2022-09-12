@@ -52,6 +52,7 @@ def loopy_iter(dataset):
 
 if opt.kvd:
     print("kvd mode!")
+    mmd = MMD_computer()
     num_samples = 30
     total_mmd_loss = 0
     dataloader_kvd = final_data_kvd.get_dataloader_kvd()
@@ -63,7 +64,7 @@ if opt.kvd:
         # print("generated shape", generated.shape)
         # print(torch.max(generated))
         # print(torch.min(generated))
-        total_mmd_loss += MMD_computer()(generated, real_img, "relu53")
+        total_mmd_loss += mmd(generated, real_img, "relu53")
         print(total_mmd_loss)
     total_mmd_loss = total_mmd_loss / num_samples
     print("The KVD is {}".format(total_mmd_loss))
