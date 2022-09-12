@@ -4,7 +4,7 @@ import numpy as np
 from torchvision.models import vgg16
 
 
-# device = "cpu"
+device = "cpu"
 #
 # x = torch.randn([1, 3, 128, 64])
 # # x = nn.Flatten()(x)
