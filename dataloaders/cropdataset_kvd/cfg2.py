@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 
 labels = []
-path_lab = Path(r"/data/public/cityscapes/gtfine")
+path_lab = Path(r"/data/public/cityscapes/gtFine")
 path_lab_image = Path(r"/data/public/cityscapes/leftImg8bit")
 for mode in list(path_lab.iterdir()):
     if mode.stem == "test":
@@ -29,7 +29,6 @@ for mode in list(path_lab_image.iterdir()):
             labels_image.append(Path(path_lab_image_2 / city_folder / item))
 
 file_list_lab_image = labels_image
-print(len(file_list_lab_image))
 
 path_folder_fake = Path("/data/public/gta/labels")
 
