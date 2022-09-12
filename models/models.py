@@ -967,10 +967,10 @@ def preprocess_input3(opt, data):
 def preprocess_input_kvd(opt, data):
     data[1] = data[1].long()
     data[2] = data[2].long()
-    # if opt.gpu_ids != "-1":
-    #     data[0] = data[0].cuda()
-    #     data[1] = data[1].cuda()
-    #     data[2] = data[2].cuda()
+    if opt.gpu_ids != "-1":
+        data[0] = data[0].cuda()
+        data[1] = data[1].cuda()
+        data[2] = data[2].cuda()
     label_map = data[2]
     bs, _, h, w = label_map.size()
     nc = opt.semantic_nc

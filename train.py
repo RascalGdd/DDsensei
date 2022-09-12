@@ -64,6 +64,8 @@ if opt.kvd:
         # print("generated shape", generated.shape)
         # print(torch.max(generated))
         # print(torch.min(generated))
+        generated = generated.to("cpu")
+        real_img = real_img.to("cpu")
         total_mmd_loss += mmd(generated, real_img, "relu53")
         print(total_mmd_loss)
     total_mmd_loss = total_mmd_loss / num_samples
