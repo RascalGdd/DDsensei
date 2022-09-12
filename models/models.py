@@ -975,7 +975,7 @@ def preprocess_input_kvd(opt, data):
     bs, _, h, w = label_map.size()
     nc = opt.semantic_nc
     if opt.gpu_ids != "-1":
-        input_label = torch.FloatTensor(bs, nc, h, w).zero_()
+        input_label = torch.cuda.FloatTensor(bs, nc, h, w).zero_()
     else:
         input_label = torch.FloatTensor(bs, nc, h, w).zero_()
     input_semantics = input_label.scatter_(1, label_map, 1.0)
