@@ -17,14 +17,14 @@ opt = config.read_arguments(train=True)
 print("nb of gpus: ", torch.cuda.device_count())
 #--- create utils ---#
 timer = utils.timer(opt)
-visualizer_losses = utils.losses_saver(opt)
-losses_computer = losses.losses_computer(opt)
+# visualizer_losses = utils.losses_saver(opt)
+# losses_computer = losses.losses_computer(opt)
 dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
 if opt.crop:
     dataloader = final_data.get_dataloader()
-im_saver = utils.image_saver(opt)
-fid_computer = fid_pytorch(opt, dataloader_val)
-miou_computer = miou_pytorch(opt,dataloader_val)
+# im_saver = utils.image_saver(opt)
+# fid_computer = fid_pytorch(opt, dataloader_val)
+# miou_computer = miou_pytorch(opt,dataloader_val)
 kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 
