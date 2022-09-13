@@ -53,7 +53,7 @@ def loopy_iter(dataset):
 if opt.kvd:
     print("kvd mode!")
     mmd = MMD_computer()
-    num_samples = 30
+    # num_samples = 30
     total_mmd_loss = 0
     dataloader_kvd = final_data_kvd.get_dataloader_kvd()
     for i, data_i in enumerate(dataloader_kvd):
@@ -67,7 +67,7 @@ if opt.kvd:
         generated = generated.detach().cpu()
         real_img = real_img.detach().cpu()
         total_mmd_loss += mmd(generated, real_img, "relu53")
-    total_mmd_loss = total_mmd_loss / num_samples
+    total_mmd_loss = total_mmd_loss / i
     print("The KVD is {}".format(total_mmd_loss))
 asd
 
