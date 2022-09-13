@@ -77,7 +77,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         #     break
 
         print("label", label.shape)
-        generated = model.module.netEMA(label, edges=edges)
+        generated = model(image, label, "generate", losses_computer)
         print("fake", generated.shape)
         asd
 
