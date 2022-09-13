@@ -76,7 +76,9 @@ for epoch in range(start_epoch, opt.num_epochs):
         #     print("2", m["image"].shape)
         #     break
 
-
+        print("label", label.shape)
+        generated = model.module.netEMA(label, edges=edges)
+        print("fake", generated.shape)
 
         # if cur_iter <= 80000:
         # model.module.netG.zero_grad()
