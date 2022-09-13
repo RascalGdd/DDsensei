@@ -11,22 +11,20 @@ import config
 from torchmetrics.image.kid import KernelInceptionDistance
 import matplotlib.pyplot as plt
 import os
-import dataloaders.cropdataset_kvd.final_data as final_data_kvd
-from utils.mmd import MMD_computer
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
 print("nb of gpus: ", torch.cuda.device_count())
 #--- create utils ---#
 timer = utils.timer(opt)
-# visualizer_losses = utils.losses_saver(opt)
-# losses_computer = losses.losses_computer(opt)
+visualizer_losses = utils.losses_saver(opt)
+losses_computer = losses.losses_computer(opt)
 dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
-# if opt.crop:
-#     dataloader = final_data.get_dataloader()
-# im_saver = utils.image_saver(opt)
-# fid_computer = fid_pytorch(opt, dataloader_val)
-# miou_computer = miou_pytorch(opt,dataloader_val)
+if opt.crop:
+    dataloader = final_data.get_dataloader()
+im_saver = utils.image_saver(opt)
+fid_computer = fid_pytorch(opt, dataloader_val)
+miou_computer = miou_pytorch(opt,dataloader_val)
 kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 
@@ -50,27 +48,6 @@ def loopy_iter(dataset):
         for item in dataset :
             yield item
 
-if opt.kvd:
-    print("kvd mode!")
-    mmd = MMD_computer()
-    num_samples = 30
-    total_mmd_loss = 0
-    dataloader_kvd = final_data_kvd.get_dataloader_kvd()
-    for i, data_i in enumerate(dataloader_kvd):
-        real_img, fake_lab = models.preprocess_input_kvd(opt, data_i)
-        # print("real_img,",real_img.shape)
-        # print("fake_lab,", fake_lab.shape)
-        generated = model.module.netG(fake_lab)
-        # print("generated shape", generated.shape)
-        # print(torch.max(generated))
-        # print(torch.min(generated))
-        generated = generated.detach().cpu()
-        real_img = real_img.detach().cpu()
-        total_mmd_loss += mmd(generated, real_img, "relu53")
-    total_mmd_loss = total_mmd_loss / num_samples
-    print("The KVD is {}".format(total_mmd_loss))
-asd
-
 
 #--- the training loop ---#
 already_started = False
@@ -87,6 +64,13 @@ for epoch in range(start_epoch, opt.num_epochs):
             image, image2, label = models.preprocess_input2(opt, data_i)
         else:
             image, image2, label = models.preprocess_input3(opt, data_i)
+
+        # for m in dataloader_val:
+        #     print("1", m["label"].shape)
+        #     print("2", m["image"].shape)
+        #     break
+
+
 
         # if cur_iter <= 80000:
         # model.module.netG.zero_grad()
@@ -124,6 +108,22 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_Du.backward()
         # optimizerDe.step()
         optimizerDu.step()
+
+
+        # if True:
+        #     utils.save_networks(opt, cur_iter, model, latest=True)
+        # if True:
+        #     is_best = fid_computer.update(model, cur_iter)
+        #     if is_best:
+        #         utils.save_networks(opt, cur_iter, model, best=True)
+        #     _ = miou_computer.update(model,cur_iter)
+        #     print("no problem now")
+        #     asd
+
+
+
+
+
         #
         # # --- generator psuedo labels updates ---@
         #
@@ -151,7 +151,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerG.step()
 
 
-        # model.module.netG.zero_grad()
+        model.module.netG.zero_grad()
         loss_G_ori = model(image, label, "losses_G_ori2", losses_computer,image2)
         loss_G_ori = loss_G_ori.mean()
         loss_G_ori.backward()
