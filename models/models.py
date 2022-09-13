@@ -434,7 +434,8 @@ class Unpaired_model(nn.Module):
             which_iter = self.opt.which_iter
             path = os.path.join(self.opt.checkpoints_dir, self.opt.name, "models", str(which_iter) + "_")
             self.netG.load_state_dict(torch.load(path + "G.pth"))
-            self.netD.load_state_dict(torch.load(path + "D.pth"))
+            if not self.opt.kvd:
+                self.netD.load_state_dict(torch.load(path + "D.pth"))
             if not self.opt.no_EMA:
                 self.netEMA.load_state_dict(torch.load(path + "EMA.pth"))
 
