@@ -11,6 +11,7 @@ import config
 from torchmetrics.image.kid import KernelInceptionDistance
 import matplotlib.pyplot as plt
 import os
+from torch.optim.lr_scheduler import StepLR
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -43,6 +44,10 @@ optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0
 optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 # optimizerDe = torch.optim.Adam(model.module.wavelet_decoder.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
+
+#Scheduler
+scheduler = StepLR(optimizerD, step_size=100000, gamma=0.5)
+
 def loopy_iter(dataset):
     while True :
         for item in dataset :
@@ -56,6 +61,7 @@ if opt.model_supervision != 0 :
     supervised_iter = loopy_iter(dataloader_supervised)
 for epoch in range(start_epoch, opt.num_epochs):
     for i, data_i in enumerate(dataloader):
+        scheduler.step()
         if not already_started and i < start_iter:
             continue
         already_started = True
@@ -176,6 +182,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D, losses_D_list = model(image, label, "losses_D", losses_computer, image2)
         loss_D, losses_D_list = loss_D, [loss for loss in losses_D_list]
         loss_D.backward()
+        torch.nn.utils.clip_grad_norm_(model.module.netD.parameters(), 1000.)
         optimizerD.step()
 
         # model.module.netD_ori.zero_grad()
