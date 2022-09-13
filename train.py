@@ -67,7 +67,6 @@ if opt.kvd:
         generated = generated.detach().cpu()
         real_img = real_img.detach().cpu()
         total_mmd_loss += mmd(generated, real_img, "relu53")
-        print(total_mmd_loss)
     total_mmd_loss = total_mmd_loss / num_samples
     print("The KVD is {}".format(total_mmd_loss))
 asd
