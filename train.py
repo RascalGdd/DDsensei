@@ -22,8 +22,8 @@ timer = utils.timer(opt)
 # visualizer_losses = utils.losses_saver(opt)
 # losses_computer = losses.losses_computer(opt)
 dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
-if opt.crop:
-    dataloader = final_data.get_dataloader()
+# if opt.crop:
+#     dataloader = final_data.get_dataloader()
 # im_saver = utils.image_saver(opt)
 # fid_computer = fid_pytorch(opt, dataloader_val)
 # miou_computer = miou_pytorch(opt,dataloader_val)
