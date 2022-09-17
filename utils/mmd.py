@@ -1,12 +1,11 @@
 import torch
 import torch.nn as nn
-import tensorflow as tf
 import numpy as np
 from torchvision.models import vgg16
 
 
-# device = "cpu"
-
+device = "cpu"
+#
 # x = torch.randn([1, 3, 128, 64])
 # # x = nn.Flatten()(x)
 # y = torch.randn([1, 3, 128, 64])
@@ -14,6 +13,9 @@ from torchvision.models import vgg16
 
 
 def MMD(x, y, kernel):
+    batch = x.shape[1]
+    x = torch.reshape(x, [batch, -1])
+    y = torch.reshape(y, [batch, -1])
     """Emprical maximum mean discrepancy. The lower the result
        the more evidence that distributions are the same.
 
@@ -121,10 +123,11 @@ class MMD_computer:
         assert x.shape[0] == 1
         feature_x = self.extractor.forward(x, mode)
         feature_y = self.extractor.forward(y, mode)
-        feature_x, feature_y = self.flat(feature_x), self.flat(feature_y)
+        # feature_x, feature_y = self.flat(feature_x), self.flat(feature_y)
         # mmd_loss = self.mmd_loss(feature_x, feature_y)
         mmd_loss = MMD(feature_x, feature_y, "multiscale")
-        return mmd_loss
+        return mmd_loss * 1000
+# print(MMD_computer()(x,y,"relu53"))
 
 
 # print(MMD_computer()(x,y,"relu53"))
