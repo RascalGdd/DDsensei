@@ -5,7 +5,7 @@ import dataloaders.dataloaders as dataloaders
 import dataloaders.cropdataset.final_data as final_data
 import utils.utils as utils
 from utils.fid_scores import fid_pytorch
-from utils.miou_scores import miou_pytorch
+# from utils.miou_scores import miou_pytorch
 from models.models import cfg
 import config
 from torchmetrics.image.kid import KernelInceptionDistance
