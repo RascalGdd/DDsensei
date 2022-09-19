@@ -58,6 +58,7 @@ if opt.kvd:
 
     num_samples = 1000
     total_mmd_loss = 0
+    total_mmd_loss2 = 0
     dataloader_kvd = final_data_kvd.get_dataloader_kvd()
     for i, data_i in enumerate(dataloader_kvd):
         real_img, fake_lab = models.preprocess_input_kvd(opt, data_i)
@@ -70,11 +71,12 @@ if opt.kvd:
         generated = generated.detach().cpu()
         real_img = real_img.detach().cpu()
         total_mmd_loss += (mmd(generated, real_img, "relu53").detach().cpu().numpy() - total_mmd_loss) / (i+1)
-        print(total_mmd_loss)
+        total_mmd_loss2 += (mmd(generated, real_img, "relu12").detach().cpu().numpy() - total_mmd_loss2) / (i + 1)
         if i == num_samples:
             break
     # total_mmd_loss = total_mmd_loss / (num_samples+1)
     print("The KVD is {}".format(total_mmd_loss))
+    print("The KVD_12 is {}".format(total_mmd_loss2))
 asd
 
 
