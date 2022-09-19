@@ -10,7 +10,7 @@ from utils.fid_folder.inception import InceptionV3
 import matplotlib.pyplot as plt
 from utils import utils
 from utils.drn_segment import drn_105_d_miou
-from utils.upernet_segment import upernet101_miou
+# from utils.upernet_segment import upernet101_miou
 from utils.deeplabV2_segment import deeplab_v2_miou
 
 # --------------------------------------------------------------------------#
