@@ -67,7 +67,7 @@ if opt.kvd:
         # print(torch.min(generated))
         generated = generated.detach().cpu()
         real_img = real_img.detach().cpu()
-        total_mmd_loss += mmd(generated, real_img, "relu53").numpy()
+        total_mmd_loss += mmd(generated, real_img, "relu53").detach().cpu().numpy()
         print(total_mmd_loss)
         if i == num_samples:
             break
