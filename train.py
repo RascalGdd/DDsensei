@@ -56,7 +56,7 @@ if opt.kvd:
     mmd = MMD_computer()
 
 
-    num_samples = 500
+    num_samples = 1000
     total_mmd_loss = 0
     dataloader_kvd = final_data_kvd.get_dataloader_kvd()
     for i, data_i in enumerate(dataloader_kvd):
