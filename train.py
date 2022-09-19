@@ -21,8 +21,6 @@ timer = utils.timer(opt)
 # visualizer_losses = utils.losses_saver(opt)
 losses_computer = losses.losses_computer(opt)
 dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
-if opt.crop:
-    dataloader = final_data.get_dataloader()
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
@@ -37,6 +35,9 @@ if opt.crop:
 #--- create models ---#
 model = models.Unpaired_model(opt,cfg)
 model = models.put_on_multi_gpus(model, opt)
+
+if opt.crop:
+    dataloader = final_data.get_dataloader()
 
 #--- create optimizers ---#
 optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
