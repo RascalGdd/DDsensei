@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch.distributions import Categorical
 import os
+from models.models import cfg
 
 generate_images = False
 compute_miou_generation = False
