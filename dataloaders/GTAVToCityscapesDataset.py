@@ -268,7 +268,7 @@ class GTAVToCityscapesDataset2(torch.utils.data.Dataset):
 
     def list_images(self):
         mode = "val" if self.opt.phase == "test" or self.for_metrics else "train"
-        if mode == "train" :
+        if mode == "val":
             images = []
             if "Kitti" in self.opt.dataroot:
                 path_img = os.path.join(self.opt.dataroot, "Depth", mode)
