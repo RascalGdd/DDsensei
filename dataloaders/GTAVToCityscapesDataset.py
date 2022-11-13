@@ -296,7 +296,7 @@ class GTAVToCityscapesDataset2(torch.utils.data.Dataset):
 
 
             print("different len of images and labels %s - %s" % (len(images), len(labels)))
-        elif mode == "val":
+        elif mode == "xxx":
             images = []
             labels = []
             if "Kitti" in self.opt.dataroot:
