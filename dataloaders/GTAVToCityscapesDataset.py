@@ -103,7 +103,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
         if self.for_supervision :
             return {"image": image, "label": label, "name": self.images[self.mixed_index[idx]],"weight" :self.weights[self.mixed_index[idx]]}
         else :
-            return {"image": image, "label": label, "name": self.images[self.mixed_index[idx]%len(self.images)]}
+            return {"image": image, "label": label, "name": self.labels[idx%len(self.labels)]}
 
     def list_images(self):
         mode = "val" if self.opt.phase == "test" or self.for_metrics else "train"
