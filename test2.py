@@ -127,7 +127,7 @@ labels = [
 opt = config.read_arguments(train=False)
 
 #--- create dataloader ---#
-_,_, dataloader_val = dataloaders.get_dataloaders(opt)
+dataloader_val = dataloaders.get_dataloaders(opt)
 dataloader_val = synthia_dataloader
 #--- create utils ---#
 image_saver = utils.results_saver(opt)
