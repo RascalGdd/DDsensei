@@ -389,9 +389,9 @@ class Unpaired_model(nn.Module):
         if mode == "generate":
             with torch.no_grad():
                 if self.opt.no_EMA:
-                    fake = self.netG(label,edges = edges)
+                    fake = self.netG(label, edges=edges)
                 else:
-                    fake = self.netEMA(label,edges = edges)
+                    fake = self.netEMA(label, edges=edges)
             return fake
 
 

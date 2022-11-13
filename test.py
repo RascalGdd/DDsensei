@@ -9,7 +9,7 @@ import config
 opt = config.read_arguments(train=False)
 
 #--- create dataloader ---#
-_, dataloader_val = dataloaders.get_dataloaders(opt)
+dataloader_val = dataloaders.get_dataloaders(opt)
 
 #--- create utils ---#
 image_saver = utils.results_saver(opt)
@@ -22,5 +22,5 @@ model.eval()
 #--- iterate over validation set ---#
 for i, data_i in enumerate(dataloader_val):
     _, label = models.preprocess_input(opt, data_i)
-    generated = model(None, label, "generate", None)
+    generated = model(_, label, "generate", None)
     image_saver(label, generated, data_i["name"])
