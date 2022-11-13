@@ -107,7 +107,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
 
     def list_images(self):
         mode = "val" if self.opt.phase == "test" or self.for_metrics else "train"
-        if mode == "train" :
+        if mode == "val":
             images = []
             if "Kitti" in self.opt.dataroot:
                 path_img = os.path.join(self.opt.dataroot, "Depth", mode)
@@ -124,12 +124,12 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
                     for item in sorted(os.listdir(cur_folder)):
                         images.append(os.path.join(city_folder, item))
             labels = []
-            path_lab = os.path.join(gtav_dataroot_origin,'labels')
+            path_lab = os.path.join(gtav_dataroot_origin, 'labels')
             for label_map in sorted(os.listdir(path_lab)):
                 if label_map.find(".png") != -1:
                     labels.append(label_map)
             print("different len of images and labels %s - %s" % (len(images), len(labels)))
-        elif mode == "val":
+        elif mode == "xxx":
             images = []
             labels = []
             if "Kitti" in self.opt.dataroot:

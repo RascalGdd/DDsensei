@@ -1,4 +1,4 @@
-
+from models.models import cfg
 import models.models as models
 import dataloaders.dataloaders as dataloaders
 import utils.utils as utils
@@ -15,7 +15,7 @@ _, dataloader_val = dataloaders.get_dataloaders(opt)
 image_saver = utils.results_saver(opt)
 
 #--- create models ---#
-model = models.OASIS_model(opt)
+model = models.Unpaired_model(opt, cfg)
 model = models.put_on_multi_gpus(model, opt)
 model.eval()
 
