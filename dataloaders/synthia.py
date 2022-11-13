@@ -6,7 +6,7 @@ import numpy as np
 from PIL import Image
 import cv2
 
-synthia_path = os.path.join(r"C:\Users\guodi\Desktop\synthia")
+synthia_path = os.path.join(r"/data/public/synthia/RAND_CITYSCAPES")
 id_to_trainid = {
     0: 0,
     1: 23,
