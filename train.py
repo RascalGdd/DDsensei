@@ -33,7 +33,7 @@ if opt.crop:
     opt.aspect_ratio = 1.0
 
 #--- create models ---#
-model = models.Unpaired_model(opt,cfg)
+model = models.Unpaired_model(opt, cfg)
 model = models.put_on_multi_gpus(model, opt)
 
 if opt.crop:
