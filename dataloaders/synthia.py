@@ -78,4 +78,4 @@ class Synthia_data(Dataset):
         return len(self.RGB_list)
 
 dataset = Synthia_data(synthia_path)
-synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
+synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=False)
