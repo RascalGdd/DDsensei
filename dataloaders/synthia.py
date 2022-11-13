@@ -6,7 +6,8 @@ import numpy as np
 from PIL import Image
 import cv2
 
-synthia_path = os.path.join(r"/data/public/synthia/RAND_CITYSCAPES")
+#synthia_path = os.path.join(r"/data/public/synthia/RAND_CITYSCAPES")
+synthia_path = os.path.join(r"/no_backups/s1422/synthia_part")
 id_to_trainid = {
     0: 0,
     1: 23,
@@ -37,15 +38,21 @@ class Synthia_data(Dataset):
     def __init__(self, path):
         super().__init__()
         self.path = path
-        self.RGB_path = os.path.join(synthia_path, "RGB")
         self.label_path = os.path.join(synthia_path, "GT", "LABELS")
-        self.RGB_list = os.listdir(self.RGB_path)
+        self.label_list = os.listdir(self.label_path)
+        self.path_img = os.path.join(self.opt.dataroot, "leftImg8bit", "val")
+        self.images = []
+        for city_folder in sorted(os.listdir(self.path_img)):
+            cur_folder = os.path.join(self.path_img, city_folder)
+            for item in sorted(os.listdir(cur_folder)):
+                self.images.append(os.path.join(cur_folder, item))
 
     def __getitem__(self, index):
-        name = self.RGB_list[index]
-        path_rgb = os.path.join(self.RGB_path, name)
+        name = self.label_list[index]
+        path_img = self.images[index]
+
         path_label = os.path.join(self.label_path, name)
-        img = Image.open(path_rgb).convert("RGB")
+        img = Image.open(path_img).convert("RGB")
 
         lbl = cv2.imread(path_label, -1)
         lbl = lbl[:, :, 2]
@@ -75,7 +82,7 @@ class Synthia_data(Dataset):
         return image
 
     def __len__(self):
-        return len(self.RGB_list)
+        return min(len(self.label_list), len(self.images))
 
 dataset = Synthia_data(synthia_path)
 synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=False)

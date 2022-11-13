@@ -93,7 +93,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
 
 
     def __len__(self,):
-        return max(len(self.images),len(self.labels))
+        return max(len(self.images), len(self.labels))
 
     def __getitem__(self, idx):
         image = Image.open(os.path.join(self.paths[0], self.images[self.mixed_index[idx]%len(self.images)])).convert('RGB')
