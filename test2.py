@@ -1,5 +1,5 @@
 from numpy import generic
-
+from dataloaders.synthia import synthia_dataloader
 import models.models as models
 import dataloaders.dataloaders as dataloaders
 import utils.utils as utils
@@ -128,13 +128,13 @@ opt = config.read_arguments(train=False)
 
 #--- create dataloader ---#
 _,_, dataloader_val = dataloaders.get_dataloaders(opt)
-
+dataloader_val = synthia_dataloader
 #--- create utils ---#
 image_saver = utils.results_saver(opt)
 
 #--- create models ---#
-#model = models.Unpaired_model(opt)
-model = models.Unpaired_model_cycle(opt)
+model = models.Unpaired_model(opt)
+# model = models.Unpaired_model_cycle(opt)
 model = models.put_on_multi_gpus(model, opt)
 model.eval()
 
@@ -145,7 +145,7 @@ if generate_images :
     #--- iterate over validation set ---#
     for i, data_i in tqdm(enumerate(dataloader_val)):
         _, label = models.preprocess_input(opt, data_i)
-        generated = model(None, label, "generate", None).cpu().detach()
+        generated = model(_, label, "generate", None).cpu().detach()
         #plt.imshow(tens_to_im(generated[0]))
         #downsampled = torch.nn.functional.interpolate(generated,scale_factor = 0.5)
         #plt.figure()
