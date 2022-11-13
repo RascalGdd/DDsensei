@@ -134,7 +134,7 @@ dataloader_val = synthia_dataloader
 image_saver = utils.results_saver(opt)
 
 #--- create models ---#
-model = models.Unpaired_model(opt)
+model = models.Unpaired_model(opt, cfg)
 # model = models.Unpaired_model_cycle(opt)
 model = models.put_on_multi_gpus(model, opt)
 model.eval()
