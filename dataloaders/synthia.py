@@ -40,7 +40,7 @@ class Synthia_data(Dataset):
         self.path = path
         self.label_path = os.path.join(synthia_path, "GT", "LABELS")
         self.label_list = os.listdir(self.label_path)
-        self.path_img = os.path.join(self.opt.dataroot, "leftImg8bit", "val")
+        self.path_img = os.path.join("/data/public/cityscapes", "leftImg8bit", "val")
         self.images = []
         for city_folder in sorted(os.listdir(self.path_img)):
             cur_folder = os.path.join(self.path_img, city_folder)
