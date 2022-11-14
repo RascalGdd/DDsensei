@@ -15,7 +15,7 @@ from models.models import cfg
 from utils.miou_scores import miou_pytorch
 
 generate_images = False
-compute_miou_generation = False
+compute_miou_generation = True
 compute_fid_generation = False
 compute_miou_segmentation_network = False
 
