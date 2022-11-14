@@ -502,7 +502,9 @@ class Unpaired_model_gc(nn.Module):
             if opt.netDu == 'wavelet':
                 self.netDu = discriminators.WaveletDiscriminator(opt)
                 self.netDu_gc = discriminators.WaveletDiscriminator(opt)
-            else :
+            elif opt.netDu == 'whole':
+                self.netDu = discriminators.UnconditionalDiscriminator(3, opt=opt)
+            else:
                 self.netDu = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
                 self.netDu_gc = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
