@@ -247,7 +247,7 @@ class Unpaired_model(nn.Module):
 
             loss_G_gan = 0
             loss_G_lpips = 0
-            fake = self.netG(label,edges = edges)
+            fake = self.netG(label, edges=edges)
 
             realism_maps = self.netD.forward(img=fake, vgg=vgg, fix_input=False,
                                              run_discs=True)
@@ -337,15 +337,15 @@ class Unpaired_model(nn.Module):
                 loss_G_vgg = None
 
         if mode == "losses_D":
-            run = self.adaptive_backprop.sample()
-            if not any(run):
-                run = True
+            # run = self.adaptive_backprop.sample()
+            # if not any(run):
+            #     run = True
             loss_D = 0
             loss_D_fake = 0
             loss_D_real = 0
             with torch.no_grad():
-                fake = self.netG(label,edges = edges)
-            realism_maps = self.netD.forward(img=fake, vgg=vgg,fix_input=True, run_discs=True)
+                fake = self.netG(label, edges = edges)
+            realism_maps = self.netD.forward(img=fake, vgg=vgg, fix_input=True, run_discs=True)
 
             # pred_labels = {}  # for adaptive backprop
             for i, rm in enumerate(realism_maps):

@@ -12,6 +12,7 @@ from torchmetrics.image.kid import KernelInceptionDistance
 import matplotlib.pyplot as plt
 import os
 from torch.optim.lr_scheduler import StepLR
+from dataloaders.synthia import synthia_dataloader
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -20,7 +21,8 @@ print("nb of gpus: ", torch.cuda.device_count())
 timer = utils.timer(opt)
 # visualizer_losses = utils.losses_saver(opt)
 losses_computer = losses.losses_computer(opt)
-dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
+dataloader, dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
+dataloader = synthia_dataloader
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
@@ -42,7 +44,7 @@ if opt.crop:
 #--- create optimizers ---#
 optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
 optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0.9,0.999), weight_decay=0.0001)
-optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
+# optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 # optimizerDe = torch.optim.Adam(model.module.wavelet_decoder.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 

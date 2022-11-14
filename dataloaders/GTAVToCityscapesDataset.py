@@ -41,17 +41,17 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
         self.images, self.labels, self.paths = self.list_images()
 
         if opt.mixed_images and not for_metrics :
-            self.mixed_index=np.random.permutation(len(self))
-        else :
-            self.mixed_index=np.arange(len(self))
+            self.mixed_index = np.random.permutation(len(self))
+        else:
+            self.mixed_index = np.arange(len(self))
 
         if for_supervision :
 
-            if opt.model_supervision == 0 :
+            if opt.model_supervision == 0:
                 return
-            elif opt.model_supervision == 1 :
+            elif opt.model_supervision == 1:
                 self.supervised_indecies = np.array(np.random.choice(len(self),opt.supervised_num),dtype=int)
-            elif opt.model_supervision == 2 :
+            elif opt.model_supervision == 2:
                 self.supervised_indecies = np.arange(len(self),dtype = int)
             images = []
             labels = []
@@ -107,7 +107,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
 
     def list_images(self):
         mode = "val" if self.opt.phase == "test" or self.for_metrics else "train"
-        if mode == "val":
+        if mode == "train":
             images = []
             if "Kitti" in self.opt.dataroot:
                 path_img = os.path.join(self.opt.dataroot, "Depth", mode)
@@ -129,7 +129,7 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
                 if label_map.find(".png") != -1:
                     labels.append(label_map)
             print("different len of images and labels %s - %s" % (len(images), len(labels)))
-        elif mode == "xxx":
+        elif mode == "val":
             images = []
             labels = []
             if "Kitti" in self.opt.dataroot:

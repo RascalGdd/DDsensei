@@ -48,8 +48,8 @@ class Synthia_data(Dataset):
                 self.images.append(os.path.join(cur_folder, item))
 
     def __getitem__(self, index):
-        name = self.label_list[index]
-        path_img = self.images[index]
+        name = self.label_list[index % len(self.label_list)]
+        path_img = self.images[index % len(self.images)]
 
         path_label = os.path.join(self.label_path, name)
         img = Image.open(path_img).convert("RGB")
@@ -82,7 +82,8 @@ class Synthia_data(Dataset):
         return image
 
     def __len__(self):
-        return min(len(self.label_list), len(self.images))
+        return max(len(self.label_list), len(self.images))
 
 dataset = Synthia_data(synthia_path)
-synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=False)
+synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
+print("len of synthia dataset", len(dataset))
