@@ -12,11 +12,12 @@ import torch
 from torch.distributions import Categorical
 import os
 from models.models import cfg
+from utils.miou_scores import miou_pytorch
 
 generate_images = False
 compute_miou_generation = False
 compute_fid_generation = False
-compute_miou_segmentation_network = True
+compute_miou_segmentation_network = False
 
 from models.generator import WaveletUpsample,InverseHaarTransform,HaarTransform,WaveletUpsample2
 wavelet_upsample = WaveletUpsample()
@@ -132,7 +133,7 @@ dataloader_val = dataloaders.get_dataloaders(opt)
 dataloader_val = synthia_dataloader
 #--- create utils ---#
 image_saver = utils.results_saver(opt)
-
+miou_computer = miou_pytorch(opt,dataloader_val)
 #--- create models ---#
 model = models.Unpaired_model(opt, cfg)
 # model = models.Unpaired_model_cycle(opt)
@@ -177,7 +178,8 @@ print(drn_105_d_miou(opt.results_dir,opt.name,'60000'))'''
 
 
 if compute_miou_generation :
-    print(drn_105_d_miou(opt.results_dir,opt.name,opt.ckpt_iter))
+    # print(drn_105_d_miou(opt.results_dir,opt.name,opt.ckpt_iter))
+    _ = miou_computer.update(model, 1234)
 else :
     np_file = np.load(os.path.join(opt.checkpoints_dir,opt.name,'MIOU',"miou_log.npy"))
     first = list(np_file[0, :])
@@ -240,7 +242,7 @@ if compute_miou_segmentation_network :
                 pixel_entropy[j,k] = Categorical(probs= generated_entropy[:,j,k]).entropy()
         #generated_plot = torch.argmax(generated, 1).cpu()
         plt.imshow(pixel_entropy)"""
-        generated_plot = torch.argmax(generated,1)[0].cpu()-1
+        generated_plot = torch.argmax(generated, 1)[0].cpu()-1
         """original_label = torch.argmax(label,1)[0].cpu()
         error_plot = generated_plot != original_label"""
         '''    plt.figure()
