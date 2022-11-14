@@ -87,3 +87,4 @@ class Synthia_data(Dataset):
 dataset = Synthia_data(synthia_path)
 synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
 print("len of synthia dataset", len(dataset))
+
