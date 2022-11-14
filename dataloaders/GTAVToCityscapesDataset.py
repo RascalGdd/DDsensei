@@ -261,9 +261,9 @@ class GTAVToCityscapesDataset2(torch.utils.data.Dataset):
         image2 = Image.open(os.path.join(self.paths[2], self.images2[idx % len(self.labels)]))
         image, label, image2 = self.transforms(image, label, image2)
         label = label * 255
-        if self.for_supervision :
+        if self.for_supervision:
             return {"image": image, "label": label, "image2": image2, "name": self.images[self.mixed_index[idx]],"weight" :self.weights[self.mixed_index[idx]]}
-        else :
+        else:
             return {"image": image, "label": label, "image2": image2, "name": self.images[self.mixed_index[idx]%len(self.images)]}
 
     def list_images(self):
