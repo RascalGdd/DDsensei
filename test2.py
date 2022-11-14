@@ -14,9 +14,9 @@ import os
 from models.models import cfg
 
 generate_images = False
-compute_miou_generation = True
-compute_fid_generation = True
-compute_miou_segmentation_network = False
+compute_miou_generation = False
+compute_fid_generation = False
+compute_miou_segmentation_network = True
 
 from models.generator import WaveletUpsample,InverseHaarTransform,HaarTransform,WaveletUpsample2
 wavelet_upsample = WaveletUpsample()

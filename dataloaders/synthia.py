@@ -6,8 +6,8 @@ import numpy as np
 from PIL import Image
 import cv2
 
-synthia_path = os.path.join(r"/data/public/synthia/RAND_CITYSCAPES")
-#synthia_path = os.path.join(r"/no_backups/s1422/synthia_part")
+#synthia_path = os.path.join(r"/data/public/synthia/RAND_CITYSCAPES")
+synthia_path = os.path.join(r"/no_backups/s1422/synthia_part")
 id_to_trainid = {
     0: 0,
     1: 23,
