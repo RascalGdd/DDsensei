@@ -1,6 +1,7 @@
 from models.sync_batchnorm import DataParallelWithCallback
 import models.generator as generators
 import models.discriminator2 as discriminators2
+from models.discriminator2 import stack
 import models.discriminator as discriminators
 import os
 import copy
@@ -242,7 +243,7 @@ class Unpaired_model(nn.Module):
 
 
         if mode == "losses_G":
-            vgg_weight = 0
+            vgg_weight = 1
             vgg_loss = lp(net='vgg').cuda()
 
             loss_G_gan = 0
@@ -255,8 +256,15 @@ class Unpaired_model(nn.Module):
                 loss_G_gan, _ = tee_loss(loss_G_gan, self.gan_loss.forward_real(rm).mean())
             del rm
             del realism_maps
-            loss_G_lpips, _ = tee_loss(loss_G_lpips,
-                                             vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
+
+            fakelist = stack(fake)
+            img2list = stack(image2)
+            for i in range(len(fakelist)):
+                loss_G_lpips, _ = tee_loss(loss_G_lpips,
+                                                 vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
+            # loss_G_lpips, _ = tee_loss(loss_G_lpips,
+            #                                  vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
+
             loss_G_lpips = loss_G_lpips.mean()
             loss_G = loss_G_gan + loss_G_lpips
 
