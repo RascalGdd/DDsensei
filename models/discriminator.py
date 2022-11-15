@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import models.norms as norms
-
+from models.discriminator2 import stack
 import math
 import numpy as np
 import random
@@ -322,6 +322,7 @@ class UnconditionalDiscriminator(nn.Module):
             )
 
     def forward(self, input):
+        input = stack(input)
 
         out = self.convs(input)
 
