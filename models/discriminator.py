@@ -317,7 +317,7 @@ class UnconditionalDiscriminator(nn.Module):
             )
         else:
             self.final_linear = nn.Sequential(
-                EqualLinear(channels[4] * 2 * 4, channels[4], activation="fused_lrelu"),
+                EqualLinear(channels[4] * 2, channels[4], activation="fused_lrelu"),
                 EqualLinear(channels[4], 1),
             )
 
@@ -576,7 +576,7 @@ class EqualLinear(nn.Module):
         if self.activation:
             # print("input",input.shape)
             # print(self.weight * self.scale)
-            out = F.linear(input, self.weight * self.scale/4)
+            out = F.linear(input, self.weight * self.scale)
             out = fused_leaky_relu(out, self.bias * self.lr_mul)
 
         else:
