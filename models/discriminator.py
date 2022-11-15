@@ -322,7 +322,7 @@ class UnconditionalDiscriminator(nn.Module):
             )
 
     def forward(self, input):
-        input = stack(input)
+        # input = stack(input)
 
         out = self.convs(input)
 
