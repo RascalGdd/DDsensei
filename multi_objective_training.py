@@ -42,7 +42,7 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     model.module.netG.zero_grad()
     model.module.netD.zero_grad()
     model.module.netDu.zero_grad()
-    loss_netD, _ = model(rep_grad, None, "losses_multi_netD", losses_computer, None)
+    loss_netD = model(rep_grad, None, "losses_multi_netD", losses_computer, None)
     loss_data["netD"] = loss_netD
     loss_netD.backward()
     grads["netD"] = []
@@ -54,7 +54,7 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     model.module.netG.zero_grad()
     model.module.netD.zero_grad()
     model.module.netDu.zero_grad()
-    _, loss_lpips = model(rep_grad, None, "losses_multi_lpips", losses_computer, image2)
+    loss_lpips = model(rep_grad, None, "losses_multi_lpips", losses_computer, image2)
     loss_data["lpips"] = loss_lpips
     loss_lpips.backward()
     grads["lpips"] = []
