@@ -68,17 +68,21 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     optimizer.zero_grad()
     loss_netDu = model(None, label, "losses_G_ori2", losses_computer, image2).mean()
     loss_netDu = loss_netDu * scale["netDu"]
-    loss_netD, loss_lpips = model(None, label, "losses_G_multi", losses_computer, image2)
-    loss_netD = loss_netD * scale["netD"]
-    loss_lpips = loss_lpips * scale["lpips"]
-
-    del grads, loss_data, rep, rep_grad
-
-    loss = loss_netDu + loss_netD + loss_lpips
-    loss.backward()
+    loss_netDu.backward()
     optimizer.step()
 
-    del loss_netDu, loss_netD, loss_lpips
+    optimizer.zero_grad()
+    loss_netD= model(None, label, "losses_G_multi1", losses_computer, image2)
+    loss_netD = loss_netD * scale["netD"]
+    loss_netD.backward()
+    optimizer.step()
+
+    optimizer.zero_grad()
+    loss_lpips = model(None, label, "losses_G_multi2", losses_computer, image2)
+    loss_lpips = loss_lpips * scale["lpips"]
+    loss_lpips.backward()
+    optimizer.step()
+
 
 
 

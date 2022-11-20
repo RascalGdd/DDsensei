@@ -308,11 +308,8 @@ class Unpaired_model(nn.Module):
             return loss_D_real
 
 
-        if mode == "losses_G_multi":
-            vgg_weight = 1
-
+        if mode == "losses_G_multi1":
             loss_G_gan = 0
-            loss_G_lpips = 0
             fake = self.netG(label, edges=edges)
 
             realism_maps = self.netD.forward(img=fake, vgg=vgg, fix_input=False,
@@ -321,6 +318,13 @@ class Unpaired_model(nn.Module):
                 loss_G_gan, _ = tee_loss(loss_G_gan, self.gan_loss.forward_real(rm).mean())
             del rm
             del realism_maps
+
+            return loss_G_gan
+
+        if mode == "losses_G_multi2":
+            vgg_weight = 1
+            loss_G_lpips = 0
+            fake = self.netG(label, edges=edges)
 
             # fakelist = stack(fake)
             # img2list = stack(image2)
@@ -331,9 +335,8 @@ class Unpaired_model(nn.Module):
                                              vgg_weight * self.vgg_loss.forward_fake(fake, image2)[0])
 
             loss_G_lpips = loss_G_lpips.mean()
-            loss_G = loss_G_gan + loss_G_lpips
 
-            return loss_G_gan, loss_G_lpips
+            return loss_G_lpips
 
 
         if mode == "losses_G_ori":
