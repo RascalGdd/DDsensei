@@ -78,7 +78,7 @@ class MinNormSolver:
         tm1 = -1.0*cur_val[proj_grad<0]/proj_grad[proj_grad<0]
         tm2 = (1.0 - cur_val[proj_grad>0])/(proj_grad[proj_grad>0])
         
-        skippers = np.sum(tm1<1e-7) + np.sum(tm2<1e-7)
+        skippers = np.sum(np.array(tm1<1e-7)) + np.sum(np.array(tm2<1e-7))
         t = 1
         if len(tm1[tm1>1e-7]) > 0:
             t = np.min(tm1[tm1>1e-7])
