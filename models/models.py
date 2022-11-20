@@ -173,7 +173,7 @@ class Unpaired_model(nn.Module):
         if mode == "losses_D_usis":
             loss_D = 0
             with torch.no_grad():
-                fake = self.netG(label,edges = edges)
+                fake = self.netG(label, edges = edges)
             output_D_fake = self.netD_ori(fake)
             loss_D_fake = losses_computer.loss(output_D_fake, label, for_real=True)
             loss_D += loss_D_fake
@@ -273,6 +273,42 @@ class Unpaired_model(nn.Module):
             return loss_G, [torch.tensor(0), loss_G_lpips, loss_G_gan, torch.tensor(0)]
 
 
+
+        if mode == "losses_multi_lpips":
+            vgg_weight = 1
+            vgg_loss = lp(net='vgg').cuda()
+            loss_G_lpips = 0
+            # fakelist = stack(fake)
+            # img2list = stack(image2)
+            # for i in range(len(fakelist)):
+            #     loss_G_lpips, _ = tee_loss(loss_G_lpips,
+            #                                      vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
+            loss_G_lpips, _ = tee_loss(loss_G_lpips,
+                                             vgg_weight * vgg_loss.forward_fake(image, image2)[0])
+            loss_G_lpips = loss_G_lpips.mean()
+            return loss_G_lpips
+
+        if mode == "losses_multi_netDu":
+            loss_Du = 0
+            output_Du_fake = self.netDu(image)
+            loss_Du_fake = self.criterionGAN(output_Du_fake, True).mean()
+            loss_Du += loss_Du_fake
+            return loss_Du
+
+        if mode == "losses_multi_netD":
+
+            loss_D_real = 0
+            realism_maps = self.netD.forward(img=image, vgg=vgg,
+                                       fix_input=False, run_discs=True)
+
+            for i, rm in enumerate(realism_maps):
+                loss_D_real += self.gan_loss.forward_real(rm).mean()
+            del rm
+            del realism_maps
+
+            return loss_D_real
+
+
         if mode == "losses_G_multi":
             vgg_weight = 1
             vgg_loss = lp(net='vgg').cuda()
@@ -304,7 +340,7 @@ class Unpaired_model(nn.Module):
 
         if mode == "losses_G_ori":
             loss_G = 0
-            fake = self.netG(label,edges = edges)
+            fake = self.netG(label, edges=edges)
             output_D = self.netD_ori(fake)
             loss_G_adv = self.opt.lambda_segment*losses_computer.loss(output_D, label, for_real=True)
             #loss_G_adv = self.opt.lambda_segment*nn.L1Loss(reduction="mean")(output_D[:,:-1,:,:], label)
@@ -431,6 +467,10 @@ class Unpaired_model(nn.Module):
                     fake = self.netG(label, edges=edges)
                 else:
                     fake = self.netEMA(label, edges=edges)
+            return fake
+
+        if mode == "generate_fortraining":
+            fake = self.netG(label, edges=edges).detach()
             return fake
 
 

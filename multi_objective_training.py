@@ -5,7 +5,7 @@ import config
 opt = config.read_arguments(train=True)
 
 
-def multi_objective(label, optimizer, model, image2, image):
+def multi_objective(label, optimizer, model, image2, image, losses_computer):
     loss_data = {}
     grads = {}
     scale = {}
@@ -18,9 +18,8 @@ def multi_objective(label, optimizer, model, image2, image):
     optimizer.zero_grad()
     # First compute representations (z)
 
-    generated = model(image, label, "generate", losses_computer=None)
+    generated = model(None, label, "generate_fortraining", None, None)
     rep = generated
-    print("type of rep is list or not?", type(rep))
     rep_grad = rep.clone()
     rep_grad.requires_grad = True
 
@@ -31,7 +30,7 @@ def multi_objective(label, optimizer, model, image2, image):
     model.module.netG.zero_grad()
     model.module.netD.zero_grad()
     model.module.netDu.zero_grad()
-    loss_netDu = model(rep_grad, label, "losses_G_ori2", image2=image2, losses_computer=None).mean()
+    loss_netDu = model(rep_grad, None, "losses_multi_netDu", losses_computer, None).mean()
     loss_data["netDu"] = loss_netDu
     loss_netDu.backward()
     grads["netDu"] = []
@@ -43,7 +42,7 @@ def multi_objective(label, optimizer, model, image2, image):
     model.module.netG.zero_grad()
     model.module.netD.zero_grad()
     model.module.netDu.zero_grad()
-    loss_netD, _ = model(rep_grad, label, "losses_G_multi", image2=image2, losses_computer=None)
+    loss_netD, _ = model(rep_grad, None, "losses_multi_netD", losses_computer, None)
     loss_data["netD"] = loss_netD
     loss_netD.backward()
     grads["netD"] = []
@@ -55,7 +54,7 @@ def multi_objective(label, optimizer, model, image2, image):
     model.module.netG.zero_grad()
     model.module.netD.zero_grad()
     model.module.netDu.zero_grad()
-    _, loss_lpips = model(rep_grad, label, "losses_G_multi", image2=image2, losses_computer=None)
+    _, loss_lpips = model(rep_grad, None, "losses_multi_lpips", losses_computer, image2)
     loss_data["lpips"] = loss_lpips
     loss_lpips.backward()
     grads["lpips"] = []
@@ -73,9 +72,9 @@ def multi_objective(label, optimizer, model, image2, image):
         scale[t] = float(sol[i])
 
     optimizer.zero_grad()
-    loss_netDu = model(rep_grad, label, "losses_G_ori2", image2=image2, losses_computer=None).mean()
+    loss_netDu = model(None, label, "losses_G_ori2", losses_computer, image2).mean()
     loss_netDu = loss_netDu * scale["netDu"]
-    loss_netD, loss_lpips = model(rep_grad, label, "losses_G_multi", image2=image2, losses_computer=None)
+    loss_netD, loss_lpips = model(None, label, "losses_G_multi", losses_computer, image2)
     loss_netD = loss_netD * scale["netD"]
     loss_lpips = loss_lpips * scale["lpips"]
 
