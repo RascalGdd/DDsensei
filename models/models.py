@@ -88,6 +88,7 @@ class Unpaired_model(nn.Module):
             self.featmatch = torch.nn.MSELoss()
         self.adaptive_backprop = AdaptiveBackprop(10, "cuda", 0.6)
         self.gan_loss = LSLoss()
+        self.vgg_loss = lp(net='vgg').cuda()
         self.print_parameter_count()
         self.init_networks()
         # --- EMA of generator weights ---
@@ -97,7 +98,7 @@ class Unpaired_model(nn.Module):
         self.load_checkpoints()
         # --- perceptual loss ---#
         if opt.add_edges :
-            self.canny_filter = CannyFilter(use_cuda= (self.opt.gpu_ids != -1) )
+            self.canny_filter = CannyFilter(use_cuda=(self.opt.gpu_ids != -1))
         if opt.phase == "train":
             if opt.add_vgg_loss:
                 self.VGG_loss = losses.VGGLoss(self.opt.gpu_ids)
@@ -246,7 +247,6 @@ class Unpaired_model(nn.Module):
 
         if mode == "losses_G":
             vgg_weight = 1
-            vgg_loss = lp(net='vgg').cuda()
 
             loss_G_gan = 0
             loss_G_lpips = 0
@@ -263,9 +263,9 @@ class Unpaired_model(nn.Module):
             # img2list = stack(image2)
             # for i in range(len(fakelist)):
             #     loss_G_lpips, _ = tee_loss(loss_G_lpips,
-            #                                      vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
+            #                                      vgg_weight * self.vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
             loss_G_lpips, _ = tee_loss(loss_G_lpips,
-                                             vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
+                                             vgg_weight * self.vgg_loss.forward_fake(fake, image2)[0])
 
             loss_G_lpips = loss_G_lpips.mean()
             loss_G = loss_G_gan + loss_G_lpips
@@ -276,15 +276,14 @@ class Unpaired_model(nn.Module):
 
         if mode == "losses_multi_lpips":
             vgg_weight = 1
-            vgg_loss = lp(net='vgg').cuda()
             loss_G_lpips = 0
             # fakelist = stack(fake)
             # img2list = stack(image2)
             # for i in range(len(fakelist)):
             #     loss_G_lpips, _ = tee_loss(loss_G_lpips,
-            #                                      vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
+            #                                      vgg_weight * self.vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
             loss_G_lpips, _ = tee_loss(loss_G_lpips,
-                                             vgg_weight * vgg_loss.forward_fake(image, image2)[0])
+                                             vgg_weight * self.vgg_loss.forward_fake(image, image2)[0])
             loss_G_lpips = loss_G_lpips.mean()
             return loss_G_lpips
 
@@ -311,7 +310,6 @@ class Unpaired_model(nn.Module):
 
         if mode == "losses_G_multi":
             vgg_weight = 1
-            vgg_loss = lp(net='vgg').cuda()
 
             loss_G_gan = 0
             loss_G_lpips = 0
@@ -328,9 +326,9 @@ class Unpaired_model(nn.Module):
             # img2list = stack(image2)
             # for i in range(len(fakelist)):
             #     loss_G_lpips, _ = tee_loss(loss_G_lpips,
-            #                                      vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
+            #                                      vgg_weight * self.vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
             loss_G_lpips, _ = tee_loss(loss_G_lpips,
-                                             vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
+                                             vgg_weight * self.vgg_loss.forward_fake(fake, image2)[0])
 
             loss_G_lpips = loss_G_lpips.mean()
             loss_G = loss_G_gan + loss_G_lpips
