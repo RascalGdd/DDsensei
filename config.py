@@ -68,6 +68,7 @@ def add_all_arguments(parser, train):
     parser.add_argument('--lpips', action='store_true', help='use lpips, otherwise only patch method')
     parser.add_argument('--crop', action='store_true', help='use matched crop dataset')
     parser.add_argument('--kvd', action='store_true', help='if True, load the best iter to compute kvd')
+    parser.add_argument('--multiobjective', action='store_true', help='if True, use multi objective optimization')
 
     if train:
         parser.add_argument('--freq_print', type=int, default=1000, help='frequency of showing training results')

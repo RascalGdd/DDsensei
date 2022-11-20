@@ -13,6 +13,8 @@ import matplotlib.pyplot as plt
 import os
 from torch.optim.lr_scheduler import StepLR
 from dataloaders.synthia import synthia_dataloader
+from models.min_norm_solvers import MinNormSolver, gradient_normalizers
+from multi_objective_training import multi_objective
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -122,21 +124,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerDu.step()
 
 
-        # if True:
-        #     utils.save_networks(opt, cur_iter, model, latest=True)
-        # if True:
-        #     is_best = fid_computer.update(model, cur_iter)
-        #     if is_best:
-        #         utils.save_networks(opt, cur_iter, model, best=True)
-        #     _ = miou_computer.update(model,cur_iter)
-        #     print("no problem now")
-        #     asd
 
-
-
-
-
-        #
         # # --- generator psuedo labels updates ---@
         #
         # # --- unconditional discriminator regulaize ---#
@@ -154,21 +142,24 @@ for epoch in range(start_epoch, opt.num_epochs):
 
         # else:
 
-
+        if not opt.multibojective:
         #--- generator unconditional update ---#
-        model.module.netG.zero_grad()
-        loss_G, losses_G_list = model(image, label, "losses_G", losses_computer,image2)
-        loss_G, losses_G_list = loss_G, [loss for loss in losses_G_list]
-        loss_G.backward()
-        optimizerG.step()
+            model.module.netG.zero_grad()
+            loss_G, losses_G_list = model(image, label, "losses_G", losses_computer, image2)
+            loss_G, losses_G_list = loss_G, [loss for loss in losses_G_list]
+            loss_G.backward()
+            optimizerG.step()
 
 
-        model.module.netG.zero_grad()
-        loss_G_ori = model(image, label, "losses_G_ori2", losses_computer,image2)
-        loss_G_ori = loss_G_ori.mean()
-        loss_G_ori.backward()
-        optimizerG.step()
+            model.module.netG.zero_grad()
+            loss_G_ori = model(image, label, "losses_G_ori2", losses_computer, image2)
+            loss_G_ori = loss_G_ori.mean()
+            loss_G_ori.backward()
+            optimizerG.step()
 
+        else:
+            multi_objective(label=label, optimizer=optimizerG, model=model, image2=image2, image=image)
+            asd
 
         # --- generator conditional update ---#
         if opt.model_supervision != 0 :
