@@ -5,7 +5,7 @@ import config
 opt = config.read_arguments(train=True)
 
 
-def multi_objective(label, optimizer, model, image2, image, losses_computer):
+def multi_objective(label, optimizer, model, image2, losses_computer):
     loss_data = {}
     grads = {}
     scale = {}
