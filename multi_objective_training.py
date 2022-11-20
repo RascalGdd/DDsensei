@@ -10,10 +10,6 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     grads = {}
     scale = {}
     tasks = ["netDu", "netD", "lpips"]
-    loss_netDu = 0
-    loss_netD = 0
-    loss_lpips = 0
-
 
     optimizer.zero_grad()
     # First compute representations (z)
@@ -22,8 +18,6 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     rep = generated
     rep_grad = rep.clone()
     rep_grad.requires_grad = True
-
-
 
 # for netDu
     optimizer.zero_grad()
@@ -67,6 +61,7 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
             grads[t][gr_i] = grads[t][gr_i] / gn[t]
 
     # Frank-Wolfe iteration to compute scales.
+    print(grads)
     sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
     for i, t in enumerate(tasks):
         scale[t] = float(sol[i])
