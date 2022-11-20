@@ -142,7 +142,7 @@ for epoch in range(start_epoch, opt.num_epochs):
 
         # else:
 
-        if not opt.multibojective:
+        if not opt.multiobjective:
         #--- generator unconditional update ---#
             model.module.netG.zero_grad()
             loss_G, losses_G_list = model(image, label, "losses_G", losses_computer, image2)
