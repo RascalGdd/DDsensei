@@ -68,7 +68,7 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
     for i, t in enumerate(tasks):
         scale[t] = float(sol[i])
-    print(scale)
+    # print(scale)
     optimizer.zero_grad()
     loss_netDu = model(None, label, "losses_G_ori2", losses_computer, image2).mean()
     loss_netDu = loss_netDu * scale["netDu"]
@@ -76,9 +76,9 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     loss_netD = loss_netD * scale["netD"]
     loss_lpips = loss_lpips * scale["lpips"]
 
-    print("loss_netDu", loss_netDu)
-    print("loss_netD", loss_netD)
-    print("loss_lpips", loss_lpips)
+    # print("loss_netDu", loss_netDu)
+    # print("loss_netD", loss_netD)
+    # print("loss_lpips", loss_lpips)
 
     loss = loss_netDu + loss_netD + loss_lpips
     loss.backward()

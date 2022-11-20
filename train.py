@@ -159,7 +159,6 @@ for epoch in range(start_epoch, opt.num_epochs):
 
         else:
             multi_objective(label=label, optimizer=optimizerG, model=model, image2=image2, losses_computer=losses_computer)
-            asd
 
         # --- generator conditional update ---#
         if opt.model_supervision != 0 :
