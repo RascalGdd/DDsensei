@@ -107,8 +107,8 @@ class Unpaired_model(nn.Module):
     def forward(self, image, label, mode, losses_computer, image2=None):
         # Branching is applied to be compatible with DataParallel
         inv_idx = torch.arange(256 - 1, -1, -1).long().cuda()
-        label_gc = torch.index_select(label.clone(), 2, inv_idx)
-        image_gc = torch.index_select(image.clone(), 2, inv_idx)
+        # label_gc = torch.index_select(label.clone(), 2, inv_idx)
+        # image_gc = torch.index_select(image.clone(), 2, inv_idx)
         if self.opt.add_edges :
             edges = self.canny_filter(image,low_threshold = 0.1,high_threshold = 0.3,hysteresis = True)[-1].detach().float()
             import matplotlib.pyplot as plt
