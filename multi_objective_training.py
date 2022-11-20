@@ -61,10 +61,10 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
             grads[t][gr_i] = grads[t][gr_i] / gn[t]
 
     # Frank-Wolfe iteration to compute scales.
-    print(len(grads))
-    print(grads["netDu"][0].shape)
-    print(grads["netD"][0].shape)
-    print(grads["lpips"][0].shape)
+    # print(len(grads))
+    # print(grads["netDu"][0].shape)
+    # print(grads["netD"][0].shape)
+    # print(grads["lpips"][0].shape)
     sol, min_norm = MinNormSolver.find_min_norm_element([grads[t] for t in tasks])
     for i, t in enumerate(tasks):
         scale[t] = float(sol[i])
