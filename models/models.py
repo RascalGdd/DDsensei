@@ -259,13 +259,13 @@ class Unpaired_model(nn.Module):
             del rm
             del realism_maps
 
-            # fakelist = stack(fake)
-            # img2list = stack(image2)
-            # for i in range(len(fakelist)):
-            #     loss_G_lpips, _ = tee_loss(loss_G_lpips,
-            #                                      vgg_weight * self.vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
-            loss_G_lpips, _ = tee_loss(loss_G_lpips,
-                                             vgg_weight * self.vgg_loss.forward_fake(fake, image2)[0])
+            fakelist = stack(fake)
+            img2list = stack(image2)
+            for i in range(len(fakelist)):
+                loss_G_lpips, _ = tee_loss(loss_G_lpips,
+                                                 vgg_weight * self.vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
+            # loss_G_lpips, _ = tee_loss(loss_G_lpips,
+            #                                  vgg_weight * self.vgg_loss.forward_fake(fake, image2)[0])
 
             loss_G_lpips = loss_G_lpips.mean()
             loss_G = loss_G_gan + loss_G_lpips
