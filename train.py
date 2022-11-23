@@ -15,7 +15,7 @@ from torch.optim.lr_scheduler import StepLR
 from dataloaders.synthia import synthia_dataloader
 from models.min_norm_solvers import MinNormSolver, gradient_normalizers
 from multi_objective_training import multi_objective
-from utils.loss_plot import plot_losses
+from utils.loss_plot import plot_losses, plot_losses_discriminator
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -33,6 +33,7 @@ kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 multi_loss_netDu, multi_loss_netD, multi_loss_lpips = [], [], []
 multi_scale_netDu, multi_scale_netD, multi_scale_lpips = [], [], []
+loss_Du_discriminator, loss_epe_discriminator = [], []
 multi_cur = []
 
 
@@ -81,6 +82,9 @@ for epoch in range(start_epoch, opt.num_epochs):
         else:
             image, image2, label = models.preprocess_input3(opt, data_i)
 
+        if cur_iter % 100 == 0:
+            multi_cur.append(cur_iter)
+
         # for m in dataloader_val:
         #     print("1", m["label"].shape)
         #     print("2", m["image"].shape)
@@ -128,6 +132,11 @@ for epoch in range(start_epoch, opt.num_epochs):
         # optimizerDe.step()
         optimizerDu.step()
 
+        if cur_iter % 100 == 0:
+            loss_Du_discriminator.append(loss_Du.detach().cpu().numpy())
+            plot_losses_discriminator(multi_cur, opt, loss_Du_discriminator, "netDu")
+
+
 
 
         # # --- generator psuedo labels updates ---@
@@ -165,7 +174,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         else:
             multi_losses, multi_scales = multi_objective(label=label, optimizer=optimizerG, model=model, image2=image2, losses_computer=losses_computer)
             if cur_iter % 100 == 0:
-                multi_cur.append(cur_iter)
                 multi_loss_netDu.append(multi_losses[0])
                 multi_loss_netD.append(multi_losses[1])
                 multi_loss_lpips.append(multi_losses[2])
@@ -197,6 +205,10 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D.backward()
         torch.nn.utils.clip_grad_norm_(model.module.netD.parameters(), 1000.)
         optimizerD.step()
+
+        if cur_iter % 100 == 0:
+            loss_epe_discriminator.append(loss_D.detach().cpu().numpy())
+            plot_losses_discriminator(multi_cur, opt, loss_epe_discriminator, "epe")
 
         # model.module.netD_ori.zero_grad()
         # loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
