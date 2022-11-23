@@ -83,7 +83,7 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     loss_lpips.backward()
     optimizer.step()
 
-    return [loss_netDu_0, loss_netD_0, loss_lpips_0], [scale["netDu"], scale["netD"], scale["lpips"]]
+    return [loss_netDu_0.detach().cpu().numpy(), loss_netD_0.detach().cpu().numpy(), loss_lpips_0.detach().cpu().numpy()], [scale["netDu"], scale["netD"], scale["lpips"]]
 
 
 
