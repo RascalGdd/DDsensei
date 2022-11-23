@@ -33,6 +33,7 @@ kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 multi_loss_netDu, multi_loss_netD, multi_loss_lpips = [], [], []
 multi_scale_netDu, multi_scale_netD, multi_scale_lpips = [], [], []
+multi_cur = []
 
 
 if opt.crop:
@@ -163,16 +164,17 @@ for epoch in range(start_epoch, opt.num_epochs):
 
         else:
             multi_losses, multi_scales = multi_objective(label=label, optimizer=optimizerG, model=model, image2=image2, losses_computer=losses_computer)
-            if cur_iter % 1 == 0:
+            if cur_iter % 100 == 0:
+                multi_cur.append(cur_iter)
                 multi_loss_netDu.append(multi_losses[0])
                 multi_loss_netD.append(multi_losses[1])
                 multi_loss_lpips.append(multi_losses[2])
                 multi_scale_netDu.append(multi_scales[0])
                 multi_scale_netD.append(multi_scales[1])
                 multi_scale_lpips.append(multi_scales[2])
-                plot_losses(opt, multi_loss_netDu, multi_scale_netDu, "netDu")
-                plot_losses(opt, multi_loss_netD, multi_scale_netD, "netD")
-                plot_losses(opt, multi_loss_lpips, multi_scale_lpips, "lpips")
+                plot_losses(multi_cur, opt, multi_loss_netDu, multi_scale_netDu, "netDu")
+                plot_losses(multi_cur, opt, multi_loss_netD, multi_scale_netD, "netD")
+                plot_losses(multi_cur, opt, multi_loss_lpips, multi_scale_lpips, "lpips")
 
 
         # --- generator conditional update ---#
