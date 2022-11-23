@@ -290,7 +290,7 @@ class Unpaired_model(nn.Module):
         if mode == "losses_multi_netDu":
             loss_Du = 0
             output_Du_fake = self.netDu(image)
-            loss_Du_fake = self.criterionGAN(output_Du_fake, False).mean()
+            loss_Du_fake = self.criterionGAN(output_Du_fake, True).mean()
             loss_Du += loss_Du_fake
             return loss_Du
 
@@ -301,7 +301,7 @@ class Unpaired_model(nn.Module):
                                        fix_input=False, run_discs=True)
 
             for i, rm in enumerate(realism_maps):
-                loss_D_real += self.gan_loss.forward_fake(rm).mean()
+                loss_D_real += self.gan_loss.forward_real(rm).mean()
             del rm
             del realism_maps
 

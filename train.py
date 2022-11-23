@@ -15,6 +15,7 @@ from torch.optim.lr_scheduler import StepLR
 from dataloaders.synthia import synthia_dataloader
 from models.min_norm_solvers import MinNormSolver, gradient_normalizers
 from multi_objective_training import multi_objective
+from utils.loss_plot import plot_losses
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -30,6 +31,9 @@ fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
 kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
+multi_loss_netDu, multi_loss_netD, multi_loss_lpips = [], [], []
+multi_scale_netDu, multi_scale_netD, multi_scale_lpips = [], [], []
+
 
 if opt.crop:
     opt.crop_size = 256
@@ -158,7 +162,18 @@ for epoch in range(start_epoch, opt.num_epochs):
             optimizerG.step()
 
         else:
-            multi_objective(label=label, optimizer=optimizerG, model=model, image2=image2, losses_computer=losses_computer)
+            multi_losses, multi_scales = multi_objective(label=label, optimizer=optimizerG, model=model, image2=image2, losses_computer=losses_computer)
+            if cur_iter % 1 == 0:
+                multi_loss_netDu.append(multi_losses[0])
+                multi_loss_netD.append(multi_losses[1])
+                multi_loss_lpips.append(multi_losses[2])
+                multi_scale_netDu.append(multi_scales[0])
+                multi_scale_netD.append(multi_scales[1])
+                multi_scale_lpips.append(multi_scales[2])
+                plot_losses(opt, multi_loss_netDu, multi_scale_netDu, "netDu")
+                plot_losses(opt, multi_loss_netD, multi_scale_netD, "netD")
+                plot_losses(opt, multi_loss_lpips, multi_scale_lpips, "lpips")
+
 
         # --- generator conditional update ---#
         if opt.model_supervision != 0 :

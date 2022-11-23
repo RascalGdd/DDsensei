@@ -66,22 +66,24 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
         scale[t] = float(sol[i])
     # print(scale)
     optimizer.zero_grad()
-    loss_netDu = model(None, label, "losses_G_ori2", losses_computer, image2).mean()
-    loss_netDu = loss_netDu * scale["netDu"]
+    loss_netDu_0 = model(None, label, "losses_G_ori2", losses_computer, image2).mean()
+    loss_netDu = loss_netDu_0 * scale["netDu"]
     loss_netDu.backward()
     optimizer.step()
 
     optimizer.zero_grad()
-    loss_netD= model(None, label, "losses_G_multi1", losses_computer, image2)
-    loss_netD = loss_netD * scale["netD"]
+    loss_netD_0= model(None, label, "losses_G_multi1", losses_computer, image2)
+    loss_netD = loss_netD_0 * scale["netD"]
     loss_netD.backward()
     optimizer.step()
 
     optimizer.zero_grad()
-    loss_lpips = model(None, label, "losses_G_multi2", losses_computer, image2)
-    loss_lpips = loss_lpips * scale["lpips"]
+    loss_lpips_0 = model(None, label, "losses_G_multi2", losses_computer, image2)
+    loss_lpips = loss_lpips_0 * scale["lpips"]
     loss_lpips.backward()
     optimizer.step()
+
+    return [loss_netDu_0, loss_netD_0, loss_lpips_0], [scale["netDu"], scale["netD"], scale["lpips"]]
 
 
 
