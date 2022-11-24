@@ -77,6 +77,11 @@ def multi_objective(label, optimizer, model, image2, losses_computer):
     loss_netD.backward()
     optimizer.step()
 
+
+# to make lpips not too small
+    scale["lpips"] = 1
+
+
     optimizer.zero_grad()
     loss_lpips_0 = model(None, label, "losses_G_multi2", losses_computer, image2)
     loss_lpips = loss_lpips_0 * scale["lpips"]
