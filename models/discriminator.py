@@ -435,13 +435,13 @@ class EqualConv2d(nn.Module):
 
     def forward(self, input):
         # print("Before EqualConv2d: ", input.abs().mean())
-        out = self.norm_layer(F.conv2d(
+        out = F.conv2d(
             input,
             self.weight * self.scale,
             bias=self.bias,
             stride=self.stride,
             padding=self.padding,
-        ))
+        )
         # print("After EqualConv2d: ", out.abs().mean(), (self.weight * self.scale).abs().mean())
 
         return out
