@@ -741,8 +741,8 @@ class ConvBlock(nn.Module):
     def __init__(self, in_channel, out_channel, blur_kernel=[1, 3, 3, 1]):
         super().__init__()
         norm_layer = norms.get_spectral_norm()
-        self.conv1 = norm_layer(ConvLayer(in_channel, in_channel, 3))
-        self.conv2 = norm_layer(ConvLayer(in_channel, out_channel, 3, downsample=True))
+        self.conv1 = ConvLayer(in_channel, in_channel, 3)
+        self.conv2 = ConvLayer(in_channel, out_channel, 3, downsample=True)
 
     def forward(self, input):
         out = self.conv1(input)
