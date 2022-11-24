@@ -57,11 +57,11 @@ class IWT_SPADE_HWT(nn.Module):
         return out
 
 
-def get_spectral_norm(opt):
-    if opt.no_spectral_norm:
-        return torch.nn.Identity()
-    else:
-        return spectral_norm
+def get_spectral_norm(opt=None):
+    # if opt.no_spectral_norm:
+    #     return torch.nn.Identity()
+    # else:
+    return spectral_norm
 
 
 def get_norm_layer(opt, norm_nc):

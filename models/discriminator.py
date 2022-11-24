@@ -422,6 +422,7 @@ class EqualConv2d(nn.Module):
             torch.randn(out_channel, in_channel, kernel_size, kernel_size)
         )
         self.scale = math.sqrt(1) / math.sqrt(in_channel * (kernel_size ** 2))
+        self.norm_layer = norms.get_spectral_norm()
 
         self.stride = stride
         self.padding = padding
@@ -434,13 +435,13 @@ class EqualConv2d(nn.Module):
 
     def forward(self, input):
         # print("Before EqualConv2d: ", input.abs().mean())
-        out = F.conv2d(
+        out = self.norm_layer(F.conv2d(
             input,
             self.weight * self.scale,
             bias=self.bias,
             stride=self.stride,
             padding=self.padding,
-        )
+        ))
         # print("After EqualConv2d: ", out.abs().mean(), (self.weight * self.scale).abs().mean())
 
         return out
@@ -558,6 +559,7 @@ class EqualLinear(nn.Module):
         self, in_dim, out_dim, bias=True, bias_init=0, lr_mul=1, activation=None
     ):
         super().__init__()
+        self.norm_layer = norms.get_spectral_norm()
 
         self.weight = nn.Parameter(torch.randn(out_dim, in_dim).div_(lr_mul))
 
@@ -576,13 +578,13 @@ class EqualLinear(nn.Module):
         if self.activation:
             # print("input",input.shape)
             # print(self.weight * self.scale)
-            out = F.linear(input, self.weight * self.scale)
+            out = self.norm_layer(F.linear(input, self.weight * self.scale))
             out = fused_leaky_relu(out, self.bias * self.lr_mul)
 
         else:
-            out = F.linear(
+            out = self.norm_layer(F.linear(
                 input, self.weight * self.scale, bias=self.bias * self.lr_mul
-            )
+            ))
 
         return out
 
@@ -738,9 +740,9 @@ class WaveletDiscriminator(nn.Module):
 class ConvBlock(nn.Module):
     def __init__(self, in_channel, out_channel, blur_kernel=[1, 3, 3, 1]):
         super().__init__()
-
-        self.conv1 = ConvLayer(in_channel, in_channel, 3)
-        self.conv2 = ConvLayer(in_channel, out_channel, 3, downsample=True)
+        norm_layer = norms.get_spectral_norm()
+        self.conv1 = norm_layer(ConvLayer(in_channel, in_channel, 3))
+        self.conv2 = norm_layer(ConvLayer(in_channel, out_channel, 3, downsample=True))
 
     def forward(self, input):
         out = self.conv1(input)
