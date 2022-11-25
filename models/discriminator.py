@@ -432,8 +432,13 @@ class EqualConv2d(nn.Module):
 
         else:
             self.bias = None
-        self.sp_conv = nn.Conv2d(in_channel, out_channel, kernel_size, self.stride, self.padding, bias=bias)
+        self.sp_conv = nn.Conv2d(in_channel, out_channel, kernel_size, self.stride, self.padding)
         self.sp_conv.weight = nn.Parameter(self.weight * self.scale, requires_grad=True)
+        if bias:
+            self.sp_conv.bias = nn.Parameter(torch.zeros(out_channel), requires_grad=True)
+        else:
+            self.sp_conv.bias = None
+
         self.sp_conv = self.norm_layer(self.sp_conv)
     def forward(self, input):
         # print("Before EqualConv2d: ", input.abs().mean())
