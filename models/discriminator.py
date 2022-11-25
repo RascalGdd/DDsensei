@@ -433,8 +433,8 @@ class EqualConv2d(nn.Module):
         else:
             self.bias = None
         self.sp_conv = nn.Conv2d(in_channel, out_channel, kernel_size, self.stride, self.padding, bias=bias)
-        self.sp_conv.weight = nn.Parameter(self.weight * self.scale)
-
+        self.sp_conv.weight = nn.Parameter(self.weight * self.scale, requires_grad=True)
+        self.sp_conv = self.norm_layer(self.sp_conv)
     def forward(self, input):
         # print("Before EqualConv2d: ", input.abs().mean())
         # out = F.conv2d(
@@ -578,21 +578,21 @@ class EqualLinear(nn.Module):
         self.lr_mul = lr_mul
 
         self.sp_linear = nn.Linear(in_dim, out_dim)
-        self.sp_linear.weight = nn.Parameter(self.weight * self.scale)
+        self.sp_linear.weight = nn.Parameter(self.weight * self.scale, requires_grad=True)
 
     def forward(self, input):
         if self.activation:
             # print("input",input.shape)
             # print(self.weight * self.scale)
-            # out = F.linear(input, self.weight * self.scale)
-            out = self.sp_linear(input)
+            out = F.linear(input, self.weight * self.scale)
+            # out = self.sp_linear(input)
             out = fused_leaky_relu(out, self.bias * self.lr_mul)
 
         else:
-            # out = F.linear(
-            #     input, self.weight * self.scale, bias=self.bias * self.lr_mul
-            # )
-            out = self.sp_linear(input)
+            out = F.linear(
+                input, self.weight * self.scale, bias=self.bias * self.lr_mul
+            )
+            # out = self.sp_linear(input)
 
         return out
 
