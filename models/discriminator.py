@@ -432,16 +432,19 @@ class EqualConv2d(nn.Module):
 
         else:
             self.bias = None
+        self.sp_conv = nn.Conv2d(in_channel, out_channel, kernel_size, self.stride, self.padding, bias=bias)
+        self.sp_conv.weight = nn.Parameter(self.weight * self.scale)
 
     def forward(self, input):
         # print("Before EqualConv2d: ", input.abs().mean())
-        out = F.conv2d(
-            input,
-            self.weight * self.scale,
-            bias=self.bias,
-            stride=self.stride,
-            padding=self.padding,
-        )
+        # out = F.conv2d(
+        #     input,
+        #     self.weight * self.scale,
+        #     bias=self.bias,
+        #     stride=self.stride,
+        #     padding=self.padding,
+        # )
+        out = self.sp_conv(input)
         # print("After EqualConv2d: ", out.abs().mean(), (self.weight * self.scale).abs().mean())
 
         return out
