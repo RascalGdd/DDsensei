@@ -584,20 +584,21 @@ class EqualLinear(nn.Module):
 
         self.sp_linear = nn.Linear(in_dim, out_dim)
         self.sp_linear.weight = nn.Parameter(self.weight * self.scale, requires_grad=True)
+        self.sp_linear.bias = nn.Parameter(self.bias * self.lr_mul)
+        self.sp_linear = self.norm_layer(self.sp_linear)
 
     def forward(self, input):
         if self.activation:
-            # print("input",input.shape)
-            # print(self.weight * self.scale)
-            out = F.linear(input, self.weight * self.scale)
-            # out = self.sp_linear(input)
+
+            # out = F.linear(input, self.weight * self.scale)
+            out = self.sp_linear(input)
             out = fused_leaky_relu(out, self.bias * self.lr_mul)
 
         else:
-            out = F.linear(
-                input, self.weight * self.scale, bias=self.bias * self.lr_mul
-            )
-            # out = self.sp_linear(input)
+            # out = F.linear(
+            #     input, self.weight * self.scale, bias=self.bias * self.lr_mul
+            # )
+            out = self.sp_linear(input)
 
         return out
 
