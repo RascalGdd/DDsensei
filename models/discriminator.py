@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import models.norms as norms
-from models.discriminator2 import stack
+from models.discriminator2 import stack, stack_upsampled
 import math
 import numpy as np
 import random
@@ -718,8 +718,9 @@ class WaveletDiscriminator(nn.Module):
             EqualLinear(channels[4], 1),
         )
 
-    def forward(self, input,for_features = False):
+    def forward(self, input, for_features=False):
 
+        input = stack_upsampled(input)
         input = self.dwt(input)
         out = None
         features = []

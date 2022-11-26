@@ -10,7 +10,7 @@ import torch.nn.utils.spectral_norm as spectral_norm
 from torch.nn import init
 import torch.nn.functional as F
 import kornia as K
-
+import torchvision.transforms as tf
 import models.network_factory as nf
 
 # this is for Kornia, used just for anti-aliased resizing
@@ -34,6 +34,19 @@ def stack(a):
 
     return a
 
+def stack_upsampled(a):
+    B, C, H, W = a.shape[0], a.shape[1], a.shape[2], a.shape[3]
+    size = 2
+    Y = H // size
+    X = W // size
+    m = a[:, :, :Y, :X]
+    n = a[:, :, Y:, :X]
+    q = a[:, :, :Y, X:]
+    p = a[:, :, Y:, X:]
+    a = torch.cat([m, n, p, q])
+    a = tf.Resize([256, 512])(a)
+
+    return a
 
 class DomainNorm2d(nn.Module):
     def __init__(self, dim):
