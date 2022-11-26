@@ -69,7 +69,7 @@ def add_all_arguments(parser, train):
     parser.add_argument('--crop', action='store_true', help='use matched crop dataset')
     parser.add_argument('--kvd', action='store_true', help='if True, load the best iter to compute kvd')
     parser.add_argument('--multiobjective', action='store_true', help='if True, use multi objective optimization')
-
+    parser.add_argument('--synthia', action='store_true', help='if True, load the synthia training set')
     if train:
         parser.add_argument('--freq_print', type=int, default=1000, help='frequency of showing training results')
         parser.add_argument('--freq_save_ckpt', type=int, default=20000, help='frequency of saving the checkpoints')

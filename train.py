@@ -25,10 +25,11 @@ timer = utils.timer(opt)
 # visualizer_losses = utils.losses_saver(opt)
 losses_computer = losses.losses_computer(opt)
 dataloader, dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
-# dataloader = synthia_dataloader
+if opt.synthia:
+    dataloader = synthia_dataloader
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
-miou_computer = miou_pytorch(opt,dataloader_val)
+miou_computer = miou_pytorch(opt, dataloader_val)
 kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 multi_loss_netDu, multi_loss_netD, multi_loss_lpips = [], [], []

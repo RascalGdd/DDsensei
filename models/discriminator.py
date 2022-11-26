@@ -442,14 +442,14 @@ class EqualConv2d(nn.Module):
         self.sp_conv = self.norm_layer(self.sp_conv)
     def forward(self, input):
         # print("Before EqualConv2d: ", input.abs().mean())
-        # out = F.conv2d(
-        #     input,
-        #     self.weight * self.scale,
-        #     bias=self.bias,
-        #     stride=self.stride,
-        #     padding=self.padding,
-        # )
-        out = self.sp_conv(input)
+        out = F.conv2d(
+            input,
+            self.weight * self.scale,
+            bias=self.bias,
+            stride=self.stride,
+            padding=self.padding,
+        )
+        # out = self.sp_conv(input)
         # print("After EqualConv2d: ", out.abs().mean(), (self.weight * self.scale).abs().mean())
 
         return out
@@ -590,15 +590,15 @@ class EqualLinear(nn.Module):
     def forward(self, input):
         if self.activation:
 
-            # out = F.linear(input, self.weight * self.scale)
-            out = self.sp_linear(input)
+            out = F.linear(input, self.weight * self.scale)
+            # out = self.sp_linear(input)
             out = fused_leaky_relu(out, self.bias * self.lr_mul)
 
         else:
-            # out = F.linear(
-            #     input, self.weight * self.scale, bias=self.bias * self.lr_mul
-            # )
-            out = self.sp_linear(input)
+            out = F.linear(
+                input, self.weight * self.scale, bias=self.bias * self.lr_mul
+            )
+            # out = self.sp_linear(input)
 
         return out
 
