@@ -12,8 +12,8 @@ gtav_dataroot_origin = '/data/public/gta'
 class GTAVToCityscapesDataset(torch.utils.data.Dataset):
     def __init__(self, opt, for_metrics,for_supervision = False):
 
-        opt.load_size2 =  512 if for_metrics else 512
-        opt.crop_size2 =  512 if for_metrics else 512
+        opt.load_size2 = 512 if for_metrics else 512
+        opt.crop_size2 = 512 if for_metrics else 512
         opt.aspect_ratio2 = 2.0
 
         if not opt.crop:

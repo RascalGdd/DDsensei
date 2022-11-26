@@ -227,13 +227,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         # optimizerDe.step()
         # optimizerDe2.step()
 
-        #--- lpips ---@
-        # if opt.lpips:
-        #     print("lpips mode!")
-        #     model.module.netG.zero_grad()
-        #     lpips_loss = model(image2, label, "LPIPS", losses_computer)
-        #     lpips_loss.backward()
-        #     optimizerG.step()
         model.module.netD.zero_grad()
         loss_D_reg, _ = model(image, label, "losses_D_reg", losses_computer, image2)
         loss_D_reg.backward()
