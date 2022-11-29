@@ -21,12 +21,30 @@ print("nb of gpus: ", torch.cuda.device_count())
 #--- create utils ---#
 # visualizer_losses = utils.losses_saver(opt)
 # losses_computer = losses.losses_computer(opt)
-dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
+# dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
 # if opt.crop:
 #     dataloader = final_data.get_dataloader()
 # im_saver = utils.image_saver(opt)
 # fid_computer = fid_pytorch(opt, dataloader_val)
 # miou_computer = miou_pytorch(opt,dataloader_val)
+
+opt.load_size2 = 512
+opt.crop_size2 = 512
+opt.aspect_ratio2 = 2.0
+opt.label_nc = 34
+opt.contain_dontcare_label = True
+opt.semantic_nc = 35  # label_nc + unknown
+opt.cache_filelist_read = False
+opt.cache_filelist_write = False
+opt.for_metrics = True
+opt.load_size = 512
+opt.crop_size = 512
+opt.label_nc = 34
+opt.contain_dontcare_label = True
+opt.aspect_ratio = 2.0
+
+
+
 kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 
@@ -40,10 +58,10 @@ model = models.Unpaired_model(opt, cfg)
 model = models.put_on_multi_gpus(model, opt)
 
 #--- create optimizers ---#
-optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
-optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0.9,0.999), weight_decay=0.0001)
-optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
-optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
+# optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
+# optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0.9,0.999), weight_decay=0.0001)
+# optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
+# optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 # optimizerDe = torch.optim.Adam(model.module.wavelet_decoder.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 def loopy_iter(dataset):
     while True :
