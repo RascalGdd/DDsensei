@@ -11,11 +11,13 @@ from torchvision.utils import save_image
 
 
 def get_dataloader_kvd():
-
+## dataset_fake=real image
     dataset_fake = ImageDataset(file_list_lab_image)
+## dataset_fake2=gta label
     dataset_fake2 = ImageDataset(file_list_fake, for_label=True)
+## dataset_real=real label
     dataset_real = ImageDataset(file_list_real, for_label=True)
-    data = MatchedCrops(dataset_fake, dataset_real,dataset_fake2, matched_crop_path_kvd, weight_path)
+    data = MatchedCrops(dataset_fake, dataset_real, dataset_fake2, matched_crop_path_kvd, weight_path)
 
     loader = DataLoader(data,batch_size=1,shuffle=True)
     return loader

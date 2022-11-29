@@ -157,8 +157,8 @@ def load_options(opt):
 
 def load_iter(opt):
     if opt.kvd:
-        opt.which_iter = "latest"
-        print("load the latest iter for computing kvd!")
+        opt.which_iter = "best"
+        print("load the best iter for computing kvd!")
     if opt.which_iter == "latest":
         with open(os.path.join(opt.checkpoints_dir, opt.name, "latest_iter.txt"), "r") as f:
             res = int(f.read())
