@@ -424,9 +424,6 @@ class Unpaired_model(nn.Module):
 
     def load_checkpoints(self):
         if self.opt.phase == "test":
-            print("phase = test")
-            print(self.opt.ckpt_iter)
-            asd
             which_iter = self.opt.ckpt_iter
             path = os.path.join(self.opt.checkpoints_dir, self.opt.name, "models", str(which_iter) + "_")
             if self.opt.no_EMA:

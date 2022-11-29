@@ -86,5 +86,6 @@ if opt.kvd:
             break
     # total_mmd_loss = total_mmd_loss / (num_samples+1)
     # total_mmd_loss2 = total_mmd_loss2 / (num_samples + 1)
+        print(total_mmd_loss)
     print("The KVD is {}".format(total_mmd_loss))
     print("The KVD_12 is {}".format(total_mmd_loss2))
