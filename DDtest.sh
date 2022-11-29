@@ -22,4 +22,4 @@ conda activate myenv
 CUDA_VISIBLE_DEVICES=0 python test_kvd.py  --name PEstack  --dataset_mode gtavtocityscapes --gpu_ids 0 \
 --dataroot /data/public/cityscapes  \
 --batch_size 2 --model_supervision 0  \
---netG 9 --channels_G 16
+--netG 9 --channels_G 16 --kvd
