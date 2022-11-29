@@ -25,7 +25,7 @@ class miou_pytorch():
         self.path_to_save = os.path.join(self.opt.checkpoints_dir, self.opt.name, "MIOU")
         Path(self.path_to_save).mkdir(parents=True, exist_ok=True)
 
-    def compute_miou(self, netG, netEMA,model = None,current_iter = 'latest'):
+    def compute_miou(self, netG, netEMA,model = None,current_iter='best'):
         image_saver = utils.results_saver_mid_training(self.opt,str(current_iter))
         netG.eval()
         if not self.opt.no_EMA:
@@ -57,7 +57,7 @@ class miou_pytorch():
     def update(self, model, cur_iter):
         print("--- Iter %s: computing MIOU ---" % (cur_iter))
         cur_miou = self.compute_miou(model.module.netG, model.module.netEMA,model,cur_iter)
-        self.update_logs(cur_miou, cur_iter)
+        # self.update_logs(cur_miou, cur_iter)
         print("--- MIOU at Iter %s: " % cur_iter, "{:.2f}".format(cur_miou))
         if cur_miou < self.best_miou:
             self.best_miou = cur_miou
