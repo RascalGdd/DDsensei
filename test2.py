@@ -137,7 +137,7 @@ gta_val = GTA_VAL(opt, for_metrics=True)
 dataloader_val = torch.utils.data.DataLoader(gta_val, batch_size=opt.batch_size, shuffle=False, drop_last=False)
 #--- create utils ---#
 image_saver = utils.results_saver(opt)
-miou_computer = miou_pytorch(opt,dataloader_val)
+miou_computer = miou_pytorch(opt, dataloader_val)
 #--- create models ---#
 model = models.Unpaired_model(opt, cfg)
 # model = models.Unpaired_model_cycle(opt)
