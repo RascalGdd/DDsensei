@@ -13,10 +13,11 @@ from torch.distributions import Categorical
 import os
 from models.models import cfg
 from utils.miou_scores import miou_pytorch
+from dataloaders.gta_val import gta_val
 
 generate_images = False
 compute_miou_generation = True
-compute_fid_generation = False
+compute_fid_generation = True
 compute_miou_segmentation_network = False
 
 from models.generator import WaveletUpsample,InverseHaarTransform,HaarTransform,WaveletUpsample2
@@ -130,7 +131,8 @@ opt = config.read_arguments(train=False)
 
 #--- create dataloader ---#
 dataloader_val = dataloaders.get_dataloaders(opt)
-dataloader_val = synthia_dataloader
+# dataloader_val = synthia_dataloader
+dataloader_val = gta_val
 #--- create utils ---#
 image_saver = utils.results_saver(opt)
 miou_computer = miou_pytorch(opt,dataloader_val)
