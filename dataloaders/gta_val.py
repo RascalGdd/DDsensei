@@ -88,10 +88,10 @@ class GTA_VAL(torch.utils.data.Dataset):
 
 
     def __len__(self,):
-        return max(len(self.images),len(self.labels))
+        return min(len(self.images),len(self.labels))
 
     def __getitem__(self, idx):
-        image = Image.open(os.path.join(self.paths[0], self.images[self.mixed_index[idx]%len(self.images)])).convert('RGB')
+        image = Image.open(os.path.join(self.images[self.mixed_index[idx]%len(self.images)])).convert('RGB')
         label = Image.open(os.path.join(self.paths[1], self.labels[idx%len(self.labels)]))
         image2 = Image.open(os.path.join(self.paths[2], self.images2[idx % len(self.labels)]))
         image, label, image2 = self.transforms(image, label, image2)
@@ -99,16 +99,16 @@ class GTA_VAL(torch.utils.data.Dataset):
         if self.for_supervision:
             return {"image": image, "label": label, "name": self.images[self.mixed_index[idx]], "weight": self.weights[self.mixed_index[idx]]}
         else:
-            return {"image": image, "label": label, "name": self.images[self.mixed_index[idx]%len(self.images)]}
+            return {"image": image, "label": label, "name": self.labels[self.mixed_index[idx]%len(self.images)]}
 
     def list_images(self):
-        mode = "val" if self.opt.phase == "test" or self.for_metrics else "train"
         images = []
-        path_img = os.path.join(self.opt.dataroot, "leftImg8bit", mode)
-        for city_folder in sorted(os.listdir(path_img)):
-            cur_folder = os.path.join(path_img, city_folder)
-            for item in sorted(os.listdir(cur_folder)):
-                images.append(os.path.join(city_folder, item))
+        for mode in os.listdir(os.path.join(self.opt.dataroot, "leftImg8bit")):
+            path_img = os.path.join(self.opt.dataroot, "leftImg8bit", mode)
+            for city_folder in sorted(os.listdir(path_img)):
+                cur_folder = os.path.join(path_img, city_folder)
+                for item in sorted(os.listdir(cur_folder)):
+                    images.append(os.path.join(cur_folder, item))
         labels = []
         images2 = []
         path_lab = os.path.join(gtav_dataroot)
