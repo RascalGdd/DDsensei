@@ -43,15 +43,8 @@ opt.label_nc = 34
 opt.contain_dontcare_label = True
 opt.aspect_ratio = 2.0
 
-
-
 kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
-
-if opt.crop:
-    opt.crop_size = 256
-    opt.load_size = 286
-    opt.aspect_ratio = 1.0
 
 #--- create models ---#
 model = models.Unpaired_model(opt, cfg)
@@ -73,7 +66,7 @@ if opt.kvd:
     mmd = MMD_computer()
 
 
-    num_samples = 1000
+    num_samples = 1800
     total_mmd_loss = 0
     total_mmd_loss2 = 0
     dataloader_kvd = final_data_kvd.get_dataloader_kvd()
@@ -92,5 +85,6 @@ if opt.kvd:
         if i == num_samples:
             break
     # total_mmd_loss = total_mmd_loss / (num_samples+1)
+    # total_mmd_loss2 = total_mmd_loss2 / (num_samples + 1)
     print("The KVD is {}".format(total_mmd_loss))
     print("The KVD_12 is {}".format(total_mmd_loss2))
