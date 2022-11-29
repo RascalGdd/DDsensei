@@ -24,6 +24,11 @@ class GTA_VAL(torch.utils.data.Dataset):
         opt.cache_filelist_write = False
         opt.aspect_ratio = 2.0
 
+        opt.label_nc = 34
+        opt.contain_dontcare_label = True
+        opt.semantic_nc = 35 # label_nc + unknown
+        opt.cache_filelist_read = False
+        opt.cache_filelist_write = False
 
         self.opt = opt
         self.for_metrics = for_metrics
