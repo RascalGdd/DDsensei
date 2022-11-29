@@ -99,25 +99,23 @@ class GTA_VAL(torch.utils.data.Dataset):
 
     def list_images(self):
         mode = "val" if self.opt.phase == "test" or self.for_metrics else "train"
-        if mode == "train":
-            images = []
-            path_img = os.path.join(self.opt.dataroot, "leftImg8bit", mode)
-            for city_folder in sorted(os.listdir(path_img)):
-                cur_folder = os.path.join(path_img, city_folder)
-                for item in sorted(os.listdir(cur_folder)):
-                    images.append(os.path.join(city_folder, item))
-            labels = []
-            images2 = []
-            path_lab = os.path.join(gtav_dataroot)
-            for label_map in sorted(os.listdir(path_lab)):
-                if label_map.find(".png") != -1:
-                    labels.append(label_map)
-                    images2.append(label_map)
+        images = []
+        path_img = os.path.join(self.opt.dataroot, "leftImg8bit", mode)
+        for city_folder in sorted(os.listdir(path_img)):
+            cur_folder = os.path.join(path_img, city_folder)
+            for item in sorted(os.listdir(cur_folder)):
+                images.append(os.path.join(city_folder, item))
+        labels = []
+        images2 = []
+        path_lab = os.path.join(gtav_dataroot)
+        for label_map in sorted(os.listdir(path_lab)):
+            if label_map.find(".png") != -1:
+                labels.append(label_map)
+                images2.append(label_map)
 
-            path_img2 = os.path.join(gtav_dataroot2)
+        path_img2 = os.path.join(gtav_dataroot2)
 
-
-            print("different len of images and labels %s - %s" % (len(images), len(labels)))
+        print("different len of images and labels %s - %s" % (len(images), len(labels)))
 
         return images, labels, images2, (path_img, path_lab, path_img2)
 
