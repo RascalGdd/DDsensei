@@ -13,7 +13,7 @@ from torch.distributions import Categorical
 import os
 from models.models import cfg
 from utils.miou_scores import miou_pytorch
-from dataloaders.gta_val import gta_val
+from dataloaders.gta_val import GTA_VAL
 
 generate_images = False
 compute_miou_generation = True
@@ -132,6 +132,8 @@ opt = config.read_arguments(train=False)
 #--- create dataloader ---#
 # dataloader_val = dataloaders.get_dataloaders(opt)
 # dataloader_val = synthia_dataloader
+
+gta_val = GTA_VAL(opt, for_metrics=True)
 dataloader_val = gta_val
 #--- create utils ---#
 image_saver = utils.results_saver(opt)

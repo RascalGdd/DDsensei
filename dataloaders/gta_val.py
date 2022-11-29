@@ -137,5 +137,3 @@ class GTA_VAL(torch.utils.data.Dataset):
         image = TR.functional.normalize(image, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         image2 = TR.functional.normalize(image2, (0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
         return image, label, image2
-
-gta_val = GTA_VAL(opt, for_metrics=True)
