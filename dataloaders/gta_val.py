@@ -91,11 +91,10 @@ class GTA_VAL(torch.utils.data.Dataset):
         image2 = Image.open(os.path.join(self.paths[2], self.images2[idx % len(self.labels)]))
         image, label, image2 = self.transforms(image, label, image2)
         label = label * 255
-        image = None
         if self.for_supervision:
-            return {"image": image2, "label": label, "name": self.images[self.mixed_index[idx]], "weight": self.weights[self.mixed_index[idx]]}
+            return {"image": image, "label": label, "name": self.images[self.mixed_index[idx]], "weight": self.weights[self.mixed_index[idx]]}
         else:
-            return {"image": image2, "label": label, "name": self.images[self.mixed_index[idx]%len(self.images)]}
+            return {"image": image, "label": label, "name": self.images[self.mixed_index[idx]%len(self.images)]}
 
     def list_images(self):
         mode = "val" if self.opt.phase == "test" or self.for_metrics else "train"

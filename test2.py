@@ -130,7 +130,7 @@ labels = [
 opt = config.read_arguments(train=False)
 
 #--- create dataloader ---#
-dataloader_val = dataloaders.get_dataloaders(opt)
+# dataloader_val = dataloaders.get_dataloaders(opt)
 # dataloader_val = synthia_dataloader
 dataloader_val = gta_val
 #--- create utils ---#
