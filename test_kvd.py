@@ -19,7 +19,6 @@ import numpy
 opt = config.read_arguments(train=False)
 print("nb of gpus: ", torch.cuda.device_count())
 #--- create utils ---#
-timer = utils.timer(opt)
 # visualizer_losses = utils.losses_saver(opt)
 # losses_computer = losses.losses_computer(opt)
 dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
