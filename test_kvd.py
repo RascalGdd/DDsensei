@@ -74,7 +74,7 @@ if opt.kvd:
         real_img, fake_lab = models.preprocess_input_kvd(opt, data_i)
         # print("real_img,",real_img.shape)
         # print("fake_lab,", fake_lab.shape)
-        generated = model.module.netEMA(fake_lab)
+        generated = model.module.netG(fake_lab)
         # print("generated shape", generated.shape)
         # print(torch.max(generated))
         # print(torch.min(generated))
