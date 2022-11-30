@@ -128,9 +128,19 @@ labels = [
 
 #--- read options ---#
 opt = config.read_arguments(train=False)
+opt.load_size = 512
+opt.crop_size = 512
+opt.label_nc = 34
+opt.contain_dontcare_label = True
+opt.semantic_nc = 35  # label_nc + unknown
+opt.cache_filelist_read = False
+opt.cache_filelist_write = False
+opt.aspect_ratio = 2.0
 
 #--- create dataloader ---#
-dataloader_val = dataloaders.get_dataloaders(opt)
+# dataloader_val = dataloaders.get_dataloaders(opt)
+
+
 dataloader_val = synthia_dataloader
 
 # gta_val = GTA_VAL(opt, for_metrics=True)
