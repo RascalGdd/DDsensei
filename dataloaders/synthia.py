@@ -41,12 +41,14 @@ class Synthia_data(Dataset):
         self.label_path = os.path.join(synthia_path, "GT", "LABELS")
         self.rgb_path = os.path.join(synthia_path, "RGB")
         self.label_list = os.listdir(self.label_path)
-        self.path_img = os.path.join("/data/public/cityscapes", "leftImg8bit", "train")
+        self.path_img = os.path.join("/data/public/cityscapes")
         self.images = []
-        for city_folder in sorted(os.listdir(self.path_img)):
-            cur_folder = os.path.join(self.path_img, city_folder)
-            for item in sorted(os.listdir(cur_folder)):
-                self.images.append(os.path.join(cur_folder, item))
+        for mode in os.listdir(os.path.join(self.path_img, "leftImg8bit")):
+            path_img = os.path.join(self.path_img, "leftImg8bit", mode)
+            for city_folder in sorted(os.listdir(path_img)):
+                cur_folder = os.path.join(path_img, city_folder)
+                for item in sorted(os.listdir(cur_folder)):
+                    self.images.append(os.path.join(cur_folder, item))
 
     def __getitem__(self, index):
         name = self.label_list[index % len(self.label_list)]
@@ -85,9 +87,9 @@ class Synthia_data(Dataset):
         return image
 
     def __len__(self):
-        return max(len(self.label_list), len(self.images))
+        return min(len(self.label_list), len(self.images))
 
 dataset = Synthia_data(synthia_path)
 synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
-print("len of synthia dataset", len(dataset))
+# print("len of synthia dataset", len(dataset))
 
