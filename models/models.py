@@ -426,10 +426,8 @@ class Unpaired_model(nn.Module):
         if self.opt.phase == "test":
             which_iter = self.opt.ckpt_iter
             path = os.path.join(self.opt.checkpoints_dir, self.opt.name, "models", str(which_iter) + "_")
-            print(path)
             if self.opt.no_EMA:
                 self.netG.load_state_dict(torch.load(path + "G.pth"))
-                print("ok")
             else:
                 self.netEMA.load_state_dict(torch.load(path + "EMA.pth"))
         elif self.opt.continue_train:
