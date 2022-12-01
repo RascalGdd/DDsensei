@@ -17,7 +17,7 @@ import numpy
 from config import load_iter
 
 #--- read options ---#
-opt = config.read_arguments(train=False)
+opt = config.read_arguments(train=True)
 load_iter(opt)
 
 print("nb of gpus: ", torch.cuda.device_count())
