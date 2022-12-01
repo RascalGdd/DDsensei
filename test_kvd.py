@@ -16,17 +16,28 @@ from utils.mmd import MMD_computer
 import numpy
 
 #--- read options ---#
-opt = config.read_arguments(train=True)
+opt = config.read_arguments(train=False)
 print("nb of gpus: ", torch.cuda.device_count())
 #--- create utils ---#
 # visualizer_losses = utils.losses_saver(opt)
 # losses_computer = losses.losses_computer(opt)
-dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
+# dataloader,dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
 # if opt.crop:
 #     dataloader = final_data.get_dataloader()
 # im_saver = utils.image_saver(opt)
 # fid_computer = fid_pytorch(opt, dataloader_val)
 # miou_computer = miou_pytorch(opt,dataloader_val)
+opt.load_size = 512
+opt.crop_size = 512
+opt.label_nc = 34
+opt.contain_dontcare_label = True
+opt.semantic_nc = 35  # label_nc + unknown
+opt.cache_filelist_read = False
+opt.cache_filelist_write = False
+opt.aspect_ratio = 2.0
+
+
+
 kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
 a, b = [], []
 
