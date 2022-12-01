@@ -17,7 +17,7 @@ import numpy
 from config import load_iter
 
 #--- read options ---#
-opt = config.read_arguments(train=True)
+opt = config.read_arguments(train=False)
 load_iter(opt)
 
 print("nb of gpus: ", torch.cuda.device_count())
@@ -77,7 +77,7 @@ if opt.kvd:
         real_img, fake_lab = models.preprocess_input_kvd(opt, data_i)
         # print("real_img,",real_img.shape)
         # print("fake_lab,", fake_lab.shape)
-        generated = model.module.netEMA(fake_lab)
+        generated = model.module.netG(fake_lab)
         # print("generated shape", generated.shape)
         # print(torch.max(generated))
         # print(torch.min(generated))
