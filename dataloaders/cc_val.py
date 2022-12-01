@@ -33,7 +33,7 @@ class CC_VAL(torch.utils.data.Dataset):
         self.opt = opt
         self.for_metrics = for_metrics
         self.for_supervision = False
-        self.images, self.labels,self.images2, self.paths = self.list_images()
+        self.images, self.labels, self.paths = self.list_images()
 
         if opt.mixed_images and not for_metrics :
             self.mixed_index=np.random.permutation(len(self))
