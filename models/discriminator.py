@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import models.norms as norms
-from models.discriminator2 import stack, stack_upsampled
+from models.discriminator2 import stack
 import math
 import numpy as np
 import random
@@ -422,7 +422,6 @@ class EqualConv2d(nn.Module):
             torch.randn(out_channel, in_channel, kernel_size, kernel_size)
         )
         self.scale = math.sqrt(1) / math.sqrt(in_channel * (kernel_size ** 2))
-        self.norm_layer = norms.get_spectral_norm()
 
         self.stride = stride
         self.padding = padding
@@ -432,14 +431,7 @@ class EqualConv2d(nn.Module):
 
         else:
             self.bias = None
-        self.sp_conv = nn.Conv2d(in_channel, out_channel, kernel_size, self.stride, self.padding)
-        self.sp_conv.weight = nn.Parameter(self.weight * self.scale, requires_grad=True)
-        if bias:
-            self.sp_conv.bias = nn.Parameter(torch.zeros(out_channel), requires_grad=True)
-        else:
-            self.sp_conv.bias = None
 
-        self.sp_conv = self.norm_layer(self.sp_conv)
     def forward(self, input):
         # print("Before EqualConv2d: ", input.abs().mean())
         out = F.conv2d(
@@ -449,7 +441,6 @@ class EqualConv2d(nn.Module):
             stride=self.stride,
             padding=self.padding,
         )
-        # out = self.sp_conv(input)
         # print("After EqualConv2d: ", out.abs().mean(), (self.weight * self.scale).abs().mean())
 
         return out
@@ -567,7 +558,6 @@ class EqualLinear(nn.Module):
         self, in_dim, out_dim, bias=True, bias_init=0, lr_mul=1, activation=None
     ):
         super().__init__()
-        self.norm_layer = norms.get_spectral_norm()
 
         self.weight = nn.Parameter(torch.randn(out_dim, in_dim).div_(lr_mul))
 
@@ -582,23 +572,17 @@ class EqualLinear(nn.Module):
         self.scale = (math.sqrt(1) / math.sqrt(in_dim)) * lr_mul
         self.lr_mul = lr_mul
 
-        self.sp_linear = nn.Linear(in_dim, out_dim)
-        self.sp_linear.weight = nn.Parameter(self.weight * self.scale, requires_grad=True)
-        self.sp_linear.bias = nn.Parameter(self.bias * self.lr_mul)
-        self.sp_linear = self.norm_layer(self.sp_linear)
-
     def forward(self, input):
         if self.activation:
-
+            # print("input",input.shape)
+            # print(self.weight * self.scale)
             out = F.linear(input, self.weight * self.scale)
-            # out = self.sp_linear(input)
             out = fused_leaky_relu(out, self.bias * self.lr_mul)
 
         else:
             out = F.linear(
                 input, self.weight * self.scale, bias=self.bias * self.lr_mul
             )
-            # out = self.sp_linear(input)
 
         return out
 
@@ -718,9 +702,8 @@ class WaveletDiscriminator(nn.Module):
             EqualLinear(channels[4], 1),
         )
 
-    def forward(self, input, for_features=False):
+    def forward(self, input,for_features = False):
 
-        input = stack_upsampled(input)
         input = self.dwt(input)
         out = None
         features = []
@@ -755,7 +738,7 @@ class WaveletDiscriminator(nn.Module):
 class ConvBlock(nn.Module):
     def __init__(self, in_channel, out_channel, blur_kernel=[1, 3, 3, 1]):
         super().__init__()
-        norm_layer = norms.get_spectral_norm()
+
         self.conv1 = ConvLayer(in_channel, in_channel, 3)
         self.conv2 = ConvLayer(in_channel, out_channel, 3, downsample=True)
 
