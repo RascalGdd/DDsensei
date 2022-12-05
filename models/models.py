@@ -270,7 +270,7 @@ class Unpaired_model(nn.Module):
             loss_G_lpips = loss_G_lpips.mean()
             loss_G = loss_G_gan + loss_G_lpips
 
-            return loss_G, [torch.tensor(0), loss_G_lpips, loss_G_gan, torch.tensor(0)]
+            return loss_G, [loss_G_gan.detach().cpu().numpy(), loss_G_lpips.detach().cpu().numpy()]
 
 
 

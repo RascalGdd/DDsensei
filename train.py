@@ -15,7 +15,7 @@ from torch.optim.lr_scheduler import StepLR
 from dataloaders.synthia import synthia_dataloader
 from models.min_norm_solvers import MinNormSolver, gradient_normalizers
 from multi_objective_training import multi_objective
-from utils.loss_plot import plot_losses, plot_losses_discriminator
+from utils.loss_plot import plot_losses, plot_losses_discriminator, plot_losses_generator
 
 #--- read options ---#
 opt = config.read_arguments(train=True)
@@ -161,16 +161,23 @@ for epoch in range(start_epoch, opt.num_epochs):
         #--- generator unconditional update ---#
             model.module.netG.zero_grad()
             loss_G, losses_G_list = model(image, label, "losses_G", losses_computer, image2)
-            loss_G, losses_G_list = loss_G, [loss for loss in losses_G_list]
+            loss_G_epe, loss_G_lpips = losses_G_list[0], losses_G_list[1]
             loss_G.backward()
             optimizerG.step()
-
 
             model.module.netG.zero_grad()
             loss_G_ori = model(image, label, "losses_G_ori2", losses_computer, image2)
             loss_G_ori = loss_G_ori.mean()
             loss_G_ori.backward()
             optimizerG.step()
+
+            if cur_iter % 100 == 0:
+                multi_loss_netD.append(loss_G_epe)
+                plot_losses_generator(multi_cur, opt, multi_loss_netD, "epe")
+                multi_loss_lpips.append(loss_G_lpips)
+                plot_losses_generator(multi_cur, opt, multi_loss_lpips, "lpips")
+                multi_loss_netDu.append(loss_G_ori.detach().cpu().numpy())
+                plot_losses_generator(multi_cur, opt, multi_loss_netDu, "netDu")
 
         else:
             multi_losses, multi_scales = multi_objective(label=label, optimizer=optimizerG, model=model, image2=image2, losses_computer=losses_computer)

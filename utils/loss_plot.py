@@ -28,5 +28,14 @@ def plot_losses_discriminator(cur, opt, losses, name):
     save_path = os.path.join(path, name + "_discriminator.png")
     fig.savefig(save_path)
 
+def plot_losses_generator(cur, opt, losses, name):
+
+    path = os.path.join(opt.checkpoints_dir, opt.name, "losses")
+    os.makedirs(path, exist_ok=True)
+    fig = plt.figure()
+    plt.plot(cur, losses)
+    save_path = os.path.join(path, name + "_generator.png")
+    fig.savefig(save_path)
+
 
 
