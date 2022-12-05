@@ -86,6 +86,8 @@ class Unpaired_model(nn.Module):
                 self.netDu = discriminators.TileStyleGAN2Discriminator(3, opt=opt)
             self.criterionGAN = losses.GANLoss("nonsaturating")
             self.featmatch = torch.nn.MSELoss()
+        self.epe_regularization2 = opt.epe_regularization2
+        self.epe_regularization2_control = False
         self.adaptive_backprop = AdaptiveBackprop(10, "cuda", 0.6)
         self.gan_loss = LSLoss()
         self.vgg_loss = lp(net='vgg').cuda()
@@ -206,13 +208,17 @@ class Unpaired_model(nn.Module):
             # print("fake",fake.shape)
             output_Du_fake = self.netDu(fake)
             loss_Du_fake = self.criterionGAN(output_Du_fake, False).mean()
-            loss_Du += loss_Du_fake
 
             output_Du_real = self.netDu(image)
             loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
-            loss_Du += loss_Du_real
+            if self.epe_regularization2 and self.epe_regularization2_control and loss_Du_fake.detach().cpu().numpy() - loss_Du_real.detach().cpu().numpy() > 0.5:
+                loss_Du = loss_Du_real
+            elif self.epe_regularization2 and self.epe_regularization2_control and loss_Du_real.detach().cpu().numpy() - loss_Du_fake.detach().cpu().numpy() > 0.5:
+                loss_Du = loss_Du_fake
+            else:
+                loss_Du = loss_Du_real + loss_Du_fake
 
-            return loss_Du, [loss_Du_fake,loss_Du_real]
+            return loss_Du, [loss_Du_fake.detach().cpu().numpy(), loss_Du_real.detach().cpu().numpy()]
 
         if mode == "losses_Du_usis_decoder":
             loss_Du = 0
@@ -425,13 +431,6 @@ class Unpaired_model(nn.Module):
 
             # pred_labels = {}  # for adaptive backprop
             for i, rm in enumerate(realism_maps):
-
-                # if rm is None:
-                #     continue
-                #
-                # pred_labels[i] = [(rm.detach() < 0.5).float().reshape(1, -1)]
-                # pass
-
                 loss_D_fake, _ = tee_loss(loss_D_fake, self.gan_loss.forward_fake(rm).mean())
             del rm
             del realism_maps
@@ -440,26 +439,21 @@ class Unpaired_model(nn.Module):
                                        fix_input=False, run_discs=True)
 
             for i, rm in enumerate(realism_maps):
-
-                # if rm is None:
-                #     continue
-                #
-                # if i in pred_labels:
-                #     # predicted correctly, here real as real
-                #     pred_labels[i].append((rm.detach() > 0.5).float().reshape(1, -1))
-                # else:
-                #     pred_labels[i] = [(rm.detach() > 0.5).float().reshape(1, -1)]
-                #     pass
-                #
-
                 loss_D_real += self.gan_loss.forward_real(rm).mean()
             del rm
             del realism_maps
-            loss_D = loss_D_real + loss_D_fake
+
+            if self.epe_regularization2 and self.epe_regularization2_control and loss_D_fake.detach().cpu().numpy() - loss_D_real.detach().cpu().numpy() > 0.5:
+                loss_D = loss_Du_real
+            elif self.epe_regularization2 and self.epe_regularization2_control and loss_D_real.detach().cpu().numpy() - loss_D_fake.detach().cpu().numpy() > 0.5:
+                loss_D = loss_Du_fake
+            else:
+                loss_D = loss_D_real + loss_D_fake
+
 
             # self.adaptive_backprop.update(pred_labels)
 
-            return loss_D, [loss_D_fake, loss_D_real]
+            return loss_D, [loss_D_fake.detach().cpu().numpy(), loss_D_real.detach().cpu().numpy()]
 
 
         if mode == "generate":

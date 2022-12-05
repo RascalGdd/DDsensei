@@ -35,6 +35,7 @@ a, b = [], []
 multi_loss_netDu, multi_loss_netD, multi_loss_lpips = [], [], []
 multi_scale_netDu, multi_scale_netD, multi_scale_lpips = [], [], []
 loss_Du_discriminator, loss_epe_discriminator = [], []
+loss_Du_fake_discriminator, loss_Du_real_discriminator, loss_D_fake_discriminator, loss_D_real_discriminator = [], [], [], []
 multi_cur = []
 
 
@@ -86,6 +87,9 @@ for epoch in range(start_epoch, opt.num_epochs):
         if cur_iter % 100 == 0:
             multi_cur.append(cur_iter)
 
+        if cur_iter > 1:
+            model.epe_regularization2_control = True
+            
         # for m in dataloader_val:
         #     print("1", m["label"].shape)
         #     print("2", m["image"].shape)
@@ -181,8 +185,8 @@ for epoch in range(start_epoch, opt.num_epochs):
         model.module.netDu.zero_grad()
         # model.module.wavelet_decoder.zero_grad()
         loss_Du, losses_Du_list = model(image, label, "losses_Du_usis", losses_computer)
-        loss_Du, losses_Du_list = opt.reg_every * loss_Du.mean(), [loss.mean() if loss is not None else None for
-                                                                   loss in losses_Du_list]
+        loss_Du = opt.reg_every * loss_Du
+        loss_Du_fake, loss_Du_real = losses_Du_list
         if opt.epe_regularization and cur_iter > 1 and loss_G_ori.detach().cpu().numpy() - loss_Du.detach().cpu().numpy() > 2:
             loss_Du.detach()
         else:
@@ -193,6 +197,11 @@ for epoch in range(start_epoch, opt.num_epochs):
         if cur_iter % 100 == 0:
             loss_Du_discriminator.append(loss_Du.detach().cpu().numpy())
             plot_losses_discriminator(multi_cur, opt, loss_Du_discriminator, "netDu")
+            loss_Du_fake_discriminator.append(loss_Du_fake)
+            plot_losses_discriminator(multi_cur, opt, loss_Du_fake_discriminator, "netDu_fake")
+            loss_Du_real_discriminator.append(loss_Du_real)
+            plot_losses_discriminator(multi_cur, opt, loss_Du_real_discriminator, "netDu_real")
+
 
 
         # --- generator conditional update ---#
@@ -211,7 +220,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         #--- discriminator update ---#
         model.module.netD.zero_grad()
         loss_D, losses_D_list = model(image, label, "losses_D", losses_computer, image2)
-        loss_D, losses_D_list = loss_D, [loss for loss in losses_D_list]
+        loss_D_fake, loss_D_real = losses_D_list
 
         if opt.epe_regularization and cur_iter > 1 and loss_G_epe - loss_D.detach().cpu().numpy() > 5:
             loss_D.detach()
@@ -223,6 +232,10 @@ for epoch in range(start_epoch, opt.num_epochs):
         if cur_iter % 100 == 0:
             loss_epe_discriminator.append(loss_D.detach().cpu().numpy())
             plot_losses_discriminator(multi_cur, opt, loss_epe_discriminator, "epe")
+            loss_D_fake_discriminator.append(loss_D_fake)
+            plot_losses_discriminator(multi_cur, opt, loss_D_fake_discriminator, "netD_fake")
+            loss_D_real_discriminator.append(loss_D_real)
+            plot_losses_discriminator(multi_cur, opt, loss_D_real_discriminator, "netD_real")
 
         # model.module.netD_ori.zero_grad()
         # loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
