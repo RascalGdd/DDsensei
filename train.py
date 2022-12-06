@@ -87,9 +87,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         if cur_iter % 100 == 0:
             multi_cur.append(cur_iter)
 
-        if cur_iter > 20000:
-            model.epe_regularization2_control = True
-
         # for m in dataloader_val:
         #     print("1", m["label"].shape)
         #     print("2", m["image"].shape)
@@ -189,6 +186,8 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_Du_fake, loss_Du_real = losses_Du_list
         if opt.epe_regularization and cur_iter > 20000 and loss_G_ori.detach().cpu().numpy() - loss_Du.detach().cpu().numpy() > 2:
             loss_Du.detach()
+        elif opt.epe_regularization2 and cur_iter > 20000 and loss_Du_real - loss_Du_fake > 0.5:
+            loss_Du.detach()
         else:
             loss_Du.backward()
             # optimizerDe.step()
@@ -223,6 +222,8 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D_fake, loss_D_real = losses_D_list
 
         if opt.epe_regularization and cur_iter > 20000 and loss_G_epe - loss_D.detach().cpu().numpy() > 5:
+            loss_D.detach()
+        elif opt.epe_regularization2 and cur_iter > 20000 and loss_D_real - loss_D_fake > 0.5:
             loss_D.detach()
         else:
             loss_D.backward()

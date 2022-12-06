@@ -211,12 +211,7 @@ class Unpaired_model(nn.Module):
 
             output_Du_real = self.netDu(image)
             loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
-            if self.epe_regularization2 and self.epe_regularization2_control and loss_Du_fake.detach().cpu().numpy() - loss_Du_real.detach().cpu().numpy() > 0.5:
-                loss_Du = loss_Du_real
-            elif self.epe_regularization2 and self.epe_regularization2_control and loss_Du_real.detach().cpu().numpy() - loss_Du_fake.detach().cpu().numpy() > 0.5:
-                loss_Du = loss_Du_fake
-            else:
-                loss_Du = loss_Du_real + loss_Du_fake
+            loss_Du = loss_Du_real + loss_Du_fake
 
             return loss_Du, [loss_Du_fake.detach().cpu().numpy(), loss_Du_real.detach().cpu().numpy()]
 
@@ -443,12 +438,7 @@ class Unpaired_model(nn.Module):
             del rm
             del realism_maps
 
-            if self.epe_regularization2 and self.epe_regularization2_control and loss_D_fake.detach().cpu().numpy() - loss_D_real.detach().cpu().numpy() > 0.5:
-                loss_D = loss_Du_real
-            elif self.epe_regularization2 and self.epe_regularization2_control and loss_D_real.detach().cpu().numpy() - loss_D_fake.detach().cpu().numpy() > 0.5:
-                loss_D = loss_Du_fake
-            else:
-                loss_D = loss_D_real + loss_D_fake
+            loss_D = loss_D_real + loss_D_fake
 
 
             # self.adaptive_backprop.update(pred_labels)
