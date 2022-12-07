@@ -213,7 +213,7 @@ class Unpaired_model(nn.Module):
             loss_Du_real = self.criterionGAN(output_Du_real, True).mean()
             loss_Du = loss_Du_real + loss_Du_fake
 
-            return loss_Du, [loss_Du_fake.detach().cpu().numpy(), loss_Du_real.detach().cpu().numpy()]
+            return loss_Du, [loss_Du_fake.item(), loss_Du_real.item()]
 
         if mode == "losses_Du_usis_decoder":
             loss_Du = 0
@@ -271,7 +271,7 @@ class Unpaired_model(nn.Module):
             loss_G_lpips = loss_G_lpips.mean()
             loss_G = loss_G_gan + loss_G_lpips
 
-            return loss_G, [loss_G_gan.detach().cpu().numpy(), loss_G_lpips.detach().cpu().numpy()]
+            return loss_G, [loss_G_gan.item(), loss_G_lpips.item()]
 
 
 
@@ -443,7 +443,7 @@ class Unpaired_model(nn.Module):
 
             # self.adaptive_backprop.update(pred_labels)
 
-            return loss_D, [loss_D_fake.detach().cpu().numpy(), loss_D_real.detach().cpu().numpy()]
+            return loss_D, [loss_D_fake.item(), loss_D_real.item()]
 
 
         if mode == "generate":

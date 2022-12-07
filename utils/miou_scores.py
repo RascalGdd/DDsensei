@@ -57,7 +57,7 @@ class miou_pytorch():
     def update(self, model, cur_iter):
         print("--- Iter %s: computing MIOU ---" % (cur_iter))
         cur_miou = self.compute_miou(model.module.netG, model.module.netEMA,model,cur_iter)
-        # self.update_logs(cur_miou, cur_iter)
+        self.update_logs(cur_miou, cur_iter)
         print("--- MIOU at Iter %s: " % cur_iter, "{:.2f}".format(cur_miou))
         if cur_miou < self.best_miou:
             self.best_miou = cur_miou

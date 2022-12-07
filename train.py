@@ -184,7 +184,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_Du, losses_Du_list = model(image, label, "losses_Du_usis", losses_computer)
         loss_Du = opt.reg_every * loss_Du
         loss_Du_fake, loss_Du_real = losses_Du_list
-        if opt.epe_regularization and cur_iter > 20000 and loss_G_ori.detach().cpu().numpy() - loss_Du.detach().cpu().numpy() > 2:
+        if opt.epe_regularization and cur_iter > 20000 and loss_G_ori.item() - loss_Du.item() > 2:
             loss_Du.detach()
         elif opt.epe_regularization2 and cur_iter > 20000 and loss_Du_real - loss_Du_fake > 0.5:
             loss_Du.detach()
@@ -221,7 +221,7 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D, losses_D_list = model(image, label, "losses_D", losses_computer, image2)
         loss_D_fake, loss_D_real = losses_D_list
 
-        if opt.epe_regularization and cur_iter > 20000 and loss_G_epe - loss_D.detach().cpu().numpy() > 5:
+        if opt.epe_regularization and cur_iter > 20000 and loss_G_epe - loss_D.item() > 5:
             loss_D.detach()
         elif opt.epe_regularization2 and cur_iter > 20000 and loss_D_real - loss_D_fake > 0.5:
             loss_D.detach()
@@ -307,7 +307,7 @@ for epoch in range(start_epoch, opt.num_epochs):
             is_best = fid_computer.update(model, cur_iter)
             if is_best:
                 utils.save_networks(opt, cur_iter, model, best=True)
-            _ = miou_computer.update(model,cur_iter)
+            _ = miou_computer.update(model, cur_iter)
 
         # visualizer_losses(cur_iter,losses_G_list+p_losses_G_list+losses_D_list_ori+losses_D_list+losses_reg_list)
 
