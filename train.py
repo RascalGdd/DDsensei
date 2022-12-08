@@ -145,10 +145,16 @@ for epoch in range(start_epoch, opt.num_epochs):
         if not opt.multiobjective:
         #--- generator unconditional update ---#
             model.module.netG.zero_grad()
-            loss_G, losses_G_list = model(image, label, "losses_G", losses_computer, image2)
-            loss_G_epe, loss_G_lpips = losses_G_list[0], losses_G_list[1]
+            loss_G, loss_G_epe = model(image, label, "losses_G_epe", losses_computer, image2)
             loss_G.backward()
             optimizerG.step()
+
+
+            model.module.netG.zero_grad()
+            loss_G, loss_G_lpips = model(image, label, "losses_G_lpips", losses_computer, image2)
+            loss_G.backward()
+            optimizerG.step()
+
 
             model.module.netG.zero_grad()
             loss_G_ori = model(image, label, "losses_G_ori2", losses_computer, image2)
