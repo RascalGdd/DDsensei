@@ -186,8 +186,10 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_Du_fake, loss_Du_real = losses_Du_list
         if opt.epe_regularization and cur_iter > 20000 and loss_G_ori.item() - loss_Du.item() > 2:
             loss_Du.detach()
+            del loss_Du
         elif opt.epe_regularization2 and cur_iter > 20000 and loss_Du_real - loss_Du_fake > 0.5:
             loss_Du.detach()
+            del loss_Du
         else:
             loss_Du.backward()
             # optimizerDe.step()
@@ -223,8 +225,10 @@ for epoch in range(start_epoch, opt.num_epochs):
 
         if opt.epe_regularization and cur_iter > 20000 and loss_G_epe - loss_D.item() > 5:
             loss_D.detach()
+            del loss_D
         elif opt.epe_regularization2 and cur_iter > 20000 and loss_D_real - loss_D_fake > 0.5:
             loss_D.detach()
+            del loss_D
         else:
             loss_D.backward()
             torch.nn.utils.clip_grad_norm_(model.module.netD.parameters(), 1000.)
