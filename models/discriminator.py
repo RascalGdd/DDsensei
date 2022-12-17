@@ -60,7 +60,8 @@ class OASIS_Discriminator(nn.Module):
         super().__init__()
         self.opt = opt
         sp_norm = norms.get_spectral_norm(opt)
-        output_channel = opt.semantic_nc + 1
+        output_channel = opt.semantic_nc
+# output_channel = opt.semantic_nc + 1 is the original version, for reverse cycle we delete "+1"
         self.channels = [3, 128, 128, 256, 256, 512, 512]
         self.body_up   = nn.ModuleList([])
         self.body_down = nn.ModuleList([])
