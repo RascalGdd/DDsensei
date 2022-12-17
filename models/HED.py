@@ -96,7 +96,8 @@ class HED(nn.Module):
         tensorScoreFiv = nn.functional.interpolate(input=tensorScoreFiv,
                                                    size=(tensorInput.size(2), tensorInput.size(3)), mode='bilinear',
                                                    align_corners=False)
-
+        return self.moduleCombine(
+            torch.cat([tensorScoreOne, tensorScoreTwo, tensorScoreThr, tensorScoreFou, tensorScoreFiv], 1))
 
 def define_HED(init_weights_="/no_backups/s1422/DDsensei/pretrained_models/network-bsds500.pytorch"):
     net = HED()
