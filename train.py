@@ -54,7 +54,7 @@ if opt.crop:
 #--- create optimizers ---#
 optimizerG = torch.optim.Adam(model.module.netG.parameters(), lr=opt.lr_g, betas=(opt.beta1, opt.beta2))
 optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0.9,0.999), weight_decay=0.0001)
-# optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
+optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 # optimizerDe = torch.optim.Adam(model.module.wavelet_decoder.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 
@@ -87,23 +87,15 @@ for epoch in range(start_epoch, opt.num_epochs):
         if cur_iter % 100 == 0:
             multi_cur.append(cur_iter)
 
-        # for m in dataloader_val:
-        #     print("1", m["label"].shape)
-        #     print("2", m["image"].shape)
-        #     break
-
-        # print("label", label.shape)
-        # generated = model(image, label, "generate", losses_computer)
-        # print("fake", generated.shape)
-        # asd
 
         # if cur_iter <= 80000:
-        # model.module.netG.zero_grad()
-        # loss_G, losses_G_list = model(image, label, "losses_G_usis", losses_computer)
-        # loss_G, losses_G_list = loss_G.mean(), [loss.mean() if loss is not None else None for loss in losses_G_list]
-        # loss_G.backward()
-        # optimizerG.step()
+        model.module.netG.zero_grad()
+        loss_G = model(image, label, "losses_G_OASIS", losses_computer)
+        loss_G = loss_G.mean()
+        loss_G.backward()
+        optimizerG.step()
         #
+
         # # --- generator conditional update ---#
         # if opt.model_supervision != 0:
         #     supervised_data = next(supervised_iter)
@@ -117,12 +109,25 @@ for epoch in range(start_epoch, opt.num_epochs):
         # else:
         #     p_loss_G, p_losses_G_list = torch.zeros((1)), [torch.zeros((1))]
         #
+
         # # --- discriminator update ---#
-        # model.module.netD_ori.zero_grad()
-        # loss_D, losses_D_list = model(image, label, "losses_D_usis", losses_computer)
-        # loss_D, losses_D_list = loss_D.mean(), [loss.mean() if loss is not None else None for loss in losses_D_list]
-        # loss_D.backward()
-        # optimizerD_ori.step()
+        model.module.netD_ori.zero_grad()
+        loss_D = model(image, label, "losses_D_OASIS", losses_computer)
+        loss_D = loss_D.mean()
+        loss_D.backward()
+        optimizerD_ori.step()
+
+        model.module.netD_ori.zero_grad()
+        loss_D = model(image, label, "losses_D_OASIS_reverse_cycle", losses_computer, image2)
+        loss_D = loss_D.mean()
+        loss_D.backward()
+        optimizerD_ori.step()
+
+        model.module.netG.zero_grad()
+        loss_G = model(image, label, "losses_G_reverse_cycle", losses_computer, image2)
+        loss_G = loss_G.mean()
+        loss_G.backward()
+        optimizerG.step()
 
 
         # # --- generator psuedo labels updates ---@

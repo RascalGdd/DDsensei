@@ -15,6 +15,7 @@ import models.vgg16 as vg
 from models.discriminator_losses import LSLoss
 from models.perceptual_losses import LPIPSLoss as lp
 from models.backprop import AdaptiveBackprop
+from models.HED import define_HED
 
 run = [True] * 10
 vgg = vg.VGG16().cuda()
@@ -91,6 +92,7 @@ class Unpaired_model(nn.Module):
         self.adaptive_backprop = AdaptiveBackprop(10, "cuda", 0.6)
         self.gan_loss = LSLoss()
         self.vgg_loss = lp(net='vgg').cuda()
+        self.hed = define_HED()
         self.print_parameter_count()
         self.init_networks()
         # --- EMA of generator weights ---
@@ -120,32 +122,12 @@ class Unpaired_model(nn.Module):
         else :
             edges = None
 
-        if mode == "losses_G_usis":
-            loss_G = 0
-            fake = self.netG(label,edges = edges)
+        if mode == "losses_G_OASIS":
+            fake = self.netG(label, edges = edges)
             output_D = self.netD_ori(fake)
-            loss_G_adv = self.opt.lambda_segment*losses_computer.loss(output_D, label, for_real=True)
-            #loss_G_adv = self.opt.lambda_segment*nn.L1Loss(reduction="mean")(output_D[:,:-1,:,:], label)
+            loss_G_OASIS = self.opt.lambda_segment*losses_computer.loss(output_D, label, for_real=True)
 
-            # loss_G_adv = torch.zeros_like(loss_G_adv)
-            loss_G += loss_G_adv
-            if self.opt.add_vgg_loss:
-                loss_G_vgg = self.opt.lambda_vgg * self.VGG_loss(fake, image)
-                loss_G += loss_G_vgg
-            else:
-                loss_G_vgg = None
-
-            pred_fake = self.netDu(fake)
-            loss_G_GAN = self.criterionGAN(pred_fake, True).mean()
-            loss_G += loss_G_GAN
-
-            if self.opt.add_edge_loss:
-                loss_G_edge = self.opt.lambda_edge * self.BDCN_loss(label, fake )
-                loss_G += loss_G_edge
-            else:
-                loss_G_edge = None
-
-            return loss_G, [loss_G_adv, loss_G_vgg, loss_G_GAN, loss_G_edge]
+            return loss_G_OASIS
 
         if mode == "losses_G_ori2":
             loss_G = 0
@@ -172,8 +154,7 @@ class Unpaired_model(nn.Module):
             return loss_G
 
 
-
-        if mode == "losses_D_usis":
+        if mode == "losses_D_OASIS":
             loss_D = 0
             with torch.no_grad():
                 fake = self.netG(label, edges = edges)
@@ -198,7 +179,27 @@ class Unpaired_model(nn.Module):
             else:
                 loss_D_real = None
                 loss_D_lm = None
-            return loss_D, [loss_D_fake, loss_D_real, loss_D_lm]
+            return loss_D
+
+        if mode == "losses_G_reverse_cycle":
+            with torch.no_grad():
+                fake_label = self.netD_ori(image2)
+            fake_image2 = self.netG(fake_label, edges=edges)
+            fake_image2_hed = (self.hed(fake_image2 / 2 + 0.5) - 0.5) * 2
+            image2_hed = (self.hed(image2 / 2 + 0.5) - 0.5) * 2
+            losses_G_OASIS_reverse_cycle = self.vgg_loss.forward_fake(fake_image2_hed, image2_hed)[0]
+
+            return losses_G_OASIS_reverse_cycle
+
+        if mode == "losses_D_OASIS_reverse_cycle":
+            fake_label = self.netD_ori(image2)
+            fake_image2 = self.netG(fake_label, edges=edges)
+            fake_image2_hed = (self.hed(fake_image2 / 2 + 0.5) - 0.5) * 2
+            image2_hed = (self.hed(image2 / 2 + 0.5) - 0.5) * 2
+            losses_D_OASIS_reverse_cycle = self.vgg_loss.forward_fake(fake_image2_hed, image2_hed)[0]
+
+            return losses_D_OASIS_reverse_cycle
+
 
 
         if mode == "losses_Du_usis":
@@ -276,7 +277,6 @@ class Unpaired_model(nn.Module):
             loss_G_lpips = loss_G_lpips.mean()
 
             return loss_G_lpips, loss_G_lpips.item()
-
 
 
         if mode == "losses_multi_lpips":
