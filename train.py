@@ -87,8 +87,19 @@ for epoch in range(start_epoch, opt.num_epochs):
         if cur_iter % 100 == 0:
             multi_cur.append(cur_iter)
 
+        model.module.netD_ori.zero_grad()
+        loss_D = model(image, label, "losses_D_OASIS_reverse_cycle", losses_computer, image2)
+        loss_D = loss_D.mean()
+        loss_D.backward()
+        optimizerD_ori.step()
 
-        # if cur_iter <= 80000:
+        model.module.netG.zero_grad()
+        loss_G = model(image, label, "losses_G_reverse_cycle", losses_computer, image2)
+        loss_G = loss_G.mean()
+        loss_G.backward()
+        optimizerG.step()
+
+
         model.module.netG.zero_grad()
         loss_G = model(image, label, "losses_G_OASIS", losses_computer)
         loss_G = loss_G.mean()
@@ -117,17 +128,6 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D.backward()
         optimizerD_ori.step()
 
-        model.module.netD_ori.zero_grad()
-        loss_D = model(image, label, "losses_D_OASIS_reverse_cycle", losses_computer, image2)
-        loss_D = loss_D.mean()
-        loss_D.backward()
-        optimizerD_ori.step()
-
-        model.module.netG.zero_grad()
-        loss_G = model(image, label, "losses_G_reverse_cycle", losses_computer, image2)
-        loss_G = loss_G.mean()
-        loss_G.backward()
-        optimizerG.step()
 
 
         # # --- generator psuedo labels updates ---@
