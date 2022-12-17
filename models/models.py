@@ -193,7 +193,9 @@ class Unpaired_model(nn.Module):
 
         if mode == "losses_D_OASIS_reverse_cycle":
             fake_label = self.netD_ori(image2)
+            print(fake_label.shape)
             fake_image2 = self.netG(fake_label, edges=edges)
+            print(fake_image2.shape)
             fake_image2_hed = (self.hed(fake_image2 / 2 + 0.5) - 0.5) * 2
             image2_hed = (self.hed(image2 / 2 + 0.5) - 0.5) * 2
             losses_D_OASIS_reverse_cycle = self.vgg_loss.forward_fake(fake_image2_hed, image2_hed)[0]
