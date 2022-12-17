@@ -50,7 +50,7 @@ def get_n1_target(opt, input, label, target_is_real):
     integers = torch.argmax(label, dim=1)
     targets = targets[:, 0, :, :] * num_of_classes
     integers += targets.long()
-    integers = torch.clamp(integers, min=num_of_classes-1) - num_of_classes
+    integers = torch.clamp(integers, min=num_of_classes-1) - num_of_classes + 1
     # integers = torch.clamp(integers, min=num_of_classes-1) - num_of_classes + 1
 # It's changed here. Originally it should be integers = torch.clamp(integers, min=num_of_classes-1) - num_of_classes + 1,
 # so that the "fake" class will be index 0, other index plus 1. But for reconstruction we want it to be consistent with the input
