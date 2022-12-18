@@ -36,6 +36,7 @@ multi_loss_netDu, multi_loss_netD, multi_loss_lpips = [], [], []
 multi_scale_netDu, multi_scale_netD, multi_scale_lpips = [], [], []
 loss_Du_discriminator, loss_epe_discriminator = [], []
 loss_Du_fake_discriminator, loss_Du_real_discriminator, loss_D_fake_discriminator, loss_D_real_discriminator = [], [], [], []
+loss_D_OASIS, loss_D_OASIS_reverse, loss_G_OASIS, loss_G_reverse = [], [], [], []
 multi_cur = []
 
 
@@ -92,12 +93,20 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D = loss_D.mean()
         loss_D.backward()
         optimizerD_ori.step()
+        if cur_iter % 100 == 0:
+            loss_D_OASIS_reverse.append(loss_D.item())
+            plot_losses_discriminator(multi_cur, opt, loss_D_OASIS_reverse, "netD_OASIS_reverse")
+
+
 
         model.module.netG.zero_grad()
         loss_G = model(image, label, "losses_G_reverse_cycle", losses_computer, image2)
         loss_G = loss_G.mean()
         loss_G.backward()
         optimizerG.step()
+        if cur_iter % 100 == 0:
+            loss_G_reverse.append(loss_G.item())
+            plot_losses_generator(multi_cur, opt, loss_G_reverse, "reverse")
 
 
         model.module.netG.zero_grad()
@@ -105,6 +114,9 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_G = loss_G.mean()
         loss_G.backward()
         optimizerG.step()
+        if cur_iter % 100 == 0:
+            loss_G_OASIS.append(loss_G.item())
+            plot_losses_generator(multi_cur, opt, loss_G_OASIS, "OASIS")
         #
 
         # # --- generator conditional update ---#
@@ -127,6 +139,9 @@ for epoch in range(start_epoch, opt.num_epochs):
         loss_D = loss_D.mean()
         loss_D.backward()
         optimizerD_ori.step()
+        if cur_iter % 100 == 0:
+            loss_D_OASIS.append(loss_D.item())
+            plot_losses_discriminator(multi_cur, opt, loss_D_OASIS, "netD_OASIS")
 
 
 
