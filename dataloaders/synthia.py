@@ -90,6 +90,6 @@ class Synthia_data(Dataset):
         return min(len(self.label_list), len(self.images))
 
 dataset = Synthia_data(synthia_path)
-synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=True)
+synthia_dataloader = DataLoader(dataset, batch_size=2, shuffle=False)
 # print("len of synthia dataset", len(dataset))
 
