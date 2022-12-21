@@ -18,7 +18,7 @@ from dataloaders.cc_val import CC_VAL
 
 generate_images = False
 compute_miou_generation = True
-compute_fid_generation = True
+compute_fid_generation = False
 compute_miou_segmentation_network = False
 
 from models.generator import WaveletUpsample,InverseHaarTransform,HaarTransform,WaveletUpsample2
