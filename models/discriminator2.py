@@ -290,7 +290,7 @@ class PerceptualDiscEnsemble(DiscriminatorEnsemble):
         self._max_dim = int(cfg.get('max_dim', 256))
         self._num_layers = int(cfg.get('num_layers', 5))
         self._norm = cfg.get('norm', 'group')
-        self._downsample = cfg.get('downsample', -1)
+        self._downsample = cfg.get('downstacsample', -1)
         assert self._norm in ['group', 'spectral', 'inst', 'batch', 'domain', 'none', 'compare', 'compare2']
         pass
 
