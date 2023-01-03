@@ -10,6 +10,8 @@ def get_dataset_name(mode):
         return "CocoStuffDataset"
     if mode == "gtavtocityscapes":
         return "GTAVToCityscapesDataset"
+    if mode == "Mapillary1":
+        return "GTAVToMapillaryDataset"
     else:
         ValueError("There is no such dataset regime as %s" % mode)
 

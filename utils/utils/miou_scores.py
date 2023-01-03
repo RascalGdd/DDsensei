@@ -45,7 +45,7 @@ class miou_pytorch():
                 answer = upernet101_miou(self.opt.results_dir, self.opt.name, str(current_iter))
             elif self.opt.dataset_mode == "cityscapes":
                 answer = drn_105_d_miou(self.opt.results_dir, self.opt.name, str(current_iter))
-            elif self.opt.dataset_mode == "gtavtocityscapes":
+            elif self.opt.dataset_mode == "gtavtocityscapes" or "Mapillary" in self.opt.dataset_mode:
                 answer = drn_105_d_miou(self.opt.results_dir, self.opt.name, str(current_iter))
             elif self.opt.dataset_mode == "coco":
                 answer = deeplab_v2_miou(self.opt.results_dir, self.opt.name, str(current_iter))

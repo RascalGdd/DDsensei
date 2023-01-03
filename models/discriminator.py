@@ -690,7 +690,7 @@ class WaveletDiscriminator(nn.Module):
             second_dimension = 4
         elif opt.dataset_mode == 'ade20k':
             second_dimension = 4
-        elif opt.dataset_mode == 'gtavtocityscapes':
+        elif opt.dataset_mode == 'gtavtocityscapes' or "Mapillary" in opt.dataset_mode:
             second_dimension = 2
         if opt.crop:
             second_dimension = 4

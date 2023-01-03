@@ -192,8 +192,10 @@ class MIoUDataset(torch.utils.data.Dataset):
         self.label_list = sorted(glob.glob(os.path.join(data_dir,name,stage,'label','*.png')))
 
         info = json.load(open(join(data_dir, 'info.json'), 'r'))
-        normalize = transforms.Normalize(mean=info['mean'],
-                                         std=info['std'])
+        # normalize = transforms.Normalize(mean=info['mean'],
+        #                                  std=info['std'])
+        normalize = transforms.Normalize([0.5, 0.5, 0.5],
+                                         [0.5, 0.5, 0.5])
         self.transforms = transforms.Compose([
                 transforms.ToTensor(), normalize])
         self.to_tensor = transforms.ToTensor()
@@ -233,7 +235,7 @@ class MIoUDataset(torch.utils.data.Dataset):
 
 def drn_105_d_miou(datadir,name,stage):
     model = DRNSeg('drn_d_105',19,pretrained=False)
-    model.load_state_dict(torch.load('pretrained_models/drn-d-105_ms_cityscapes.pth'))
+    model.load_state_dict(torch.load('pretrained_models/drn-d-105_mapillary.pth'))
     model = torch.nn.DataParallel(model).cuda()
 
     dataset = MIoUDataset(datadir,name,stage)
