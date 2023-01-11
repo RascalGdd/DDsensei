@@ -95,14 +95,14 @@ class MatchedCrops(PairedDataset):
 			sc2 = sc
 			sc = (process_path(Path(dc[0])), dc[1], dc[2], dc[3], dc[4])
 
-			print("sc", sc[0])
-			print("dc", dc[0])
-			print("sc2", sc2[0])
+			# print("sc", sc[0])
+			# print("dc", dc[0])
+			# print("sc2", sc2[0])
 
 			# sc = ((str(path_folder_fake)+"\\"+sc[0].split("\\")[-1]),sc[1],sc[2],sc[3],sc[4])
 			# sc = ((str(path_folder_fake_label) + "/" + sc[0].split("/")[-1]), sc[1], sc[2], sc[3], sc[4])
 			if self._source_dataset.get_by_path(sc[0]) is not None:
-				print("GO TO not none")
+				# print("GO TO not none")
 				valid_src_crops.append(sc)
 				valid_dst_crops.append(dc)
 				valid_src_crops2.append(sc2)
