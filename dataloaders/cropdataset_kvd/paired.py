@@ -18,7 +18,7 @@ def process_path(path: Path):
 	# name = str(path).split("/")[-1]
 	# cut_idx = name.find("gtFine")
 	# name2 = name[:cut_idx] + "leftImg8bit.png"
-	name = str(path).replace(".png", ".jpg")
+	name = str(path).split("/")[-1].replace(".png", ".jpg")
 
 	# if "train" in str(path):
 	# 	path_cityscape_images = Path(path_lab_image / "train" / city / name2)
