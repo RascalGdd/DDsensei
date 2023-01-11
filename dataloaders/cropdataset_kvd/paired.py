@@ -51,7 +51,7 @@ class PairedDataset(torch.utils.data.Dataset):
 		# print("src_id",src_id)
 
 		dst_id = self._target_dataset.get_id(t[0])
-		src_id2 = self._source_dataset2.get_id(s2[0])
+		src_id2 = self._source_dataset2.get_id(s2[0]).replace(".png", ".jpg")
 
 		img_fake = torch.squeeze(self._source_dataset[src_id].crop(*s[1:]).img)
 		img_real = torch.squeeze(self._target_dataset[dst_id].crop(*t[1:]).img)
