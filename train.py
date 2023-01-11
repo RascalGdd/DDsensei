@@ -21,7 +21,7 @@ print("nb of gpus: ", torch.cuda.device_count())
 timer = utils.timer(opt)
 # visualizer_losses = utils.losses_saver(opt)
 losses_computer = losses.losses_computer(opt)
-dataloader, dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(opt)
+dataloader, dataloader_val = dataloaders.get_dataloaders(opt)
 # dataloader = synthia_dataloader
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
