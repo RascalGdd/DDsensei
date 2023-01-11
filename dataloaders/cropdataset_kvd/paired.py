@@ -14,18 +14,20 @@ from torchvision.transforms.functional import InterpolationMode
 from dataloaders.cropdataset_kvd.cfg2 import *
 
 def process_path(path: Path):
-	city = str(path).split("/")[-2]
-	name = str(path).split("/")[-1]
-	cut_idx = name.find("gtFine")
-	name2 = name[:cut_idx] + "leftImg8bit.png"
+	# city = str(path).split("/")[-2]
+	# name = str(path).split("/")[-1]
+	# cut_idx = name.find("gtFine")
+	# name2 = name[:cut_idx] + "leftImg8bit.png"
+	name = str(path).replace(".png", ".jpg")
 
-	if "train" in str(path):
-		path_cityscape_images = Path(path_lab_image / "train" / city / name2)
-	elif "val" in str(path):
-		path_cityscape_images = Path(path_lab_image / "val" / city / name2)
-	else:
-		print("file path not correct")
-		return
+	# if "train" in str(path):
+	# 	path_cityscape_images = Path(path_lab_image / "train" / city / name2)
+	# elif "val" in str(path):
+	# 	path_cityscape_images = Path(path_lab_image / "val" / city / name2)
+	# else:
+	# 	print("file path not correct")
+	# 	return
+	path_cityscape_images = Path(path_lab_image / name)
 
 	return str(path_cityscape_images)
 
@@ -51,7 +53,7 @@ class PairedDataset(torch.utils.data.Dataset):
 		# print("src_id",src_id)
 
 		dst_id = self._target_dataset.get_id(t[0])
-		src_id2 = self._source_dataset2.get_id(s2[0]).replace(".png", ".jpg")
+		src_id2 = self._source_dataset2.get_id(s2[0])
 
 		img_fake = torch.squeeze(self._source_dataset[src_id].crop(*s[1:]).img)
 		img_real = torch.squeeze(self._target_dataset[dst_id].crop(*t[1:]).img)
