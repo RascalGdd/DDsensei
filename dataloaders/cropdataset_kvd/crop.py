@@ -96,7 +96,7 @@ class ImageDataset(torch.utils.data.Dataset):
             a = np.array(a)
             return a
         else:
-            print(str(path))
+            # print(str(path))
             a = np.clip(cv2.imread(str(path)).astype(np.float32) / 255.0, 0.0, 1.0)[:, :, :3]
             a = cv2.resize(a, [752, 408])
             a = (a - 0.5) / 0.5
