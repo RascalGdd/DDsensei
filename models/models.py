@@ -259,27 +259,20 @@ class Unpaired_model(nn.Module):
 
 
             labellist = stack(label)
-            print(len(labellist))
-            first = labellist[0]
-            second = labellist[1]
-            print(first.shape)
-            map = torch.argmax(first, dim=0)
-            map2 = torch.argmax(second, dim=0)
-            count1 = len(torch.unique(map))
-            print(torch.unique(map))
-            count2 = len(torch.unique(map2))
-            print("count1", count1)
-            print("count2", count2)
-            asd
-
-
             fakelist = stack(fake)
             img2list = stack(image2)
+
+            countlist = []
+            for i in range(len(labellist)):
+                lbl_cut = labellist[i]
+                map = torch.argmax(lbl_cut, dim=0)
+                count = len(torch.unique(map))
+                countlist.append(count)
+
             for i in range(len(fakelist)):
+
                 loss_G_lpips, _ = tee_loss(loss_G_lpips,
-                                                 vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
-
-
+                                                 countlist[i] * vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
 
             # loss_G_lpips, _ = tee_loss(loss_G_lpips,
             #                                  vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
