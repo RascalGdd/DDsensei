@@ -34,6 +34,34 @@ def stack(a):
 
     return a
 
+def stack_16(a):
+    B, C, H, W = a.shape[0], a.shape[1], a.shape[2], a.shape[3]
+    size = 4
+    Y = H // size
+    X = W // size
+    m1 = a[:, :, :Y,        :X]
+    n1 = a[:, :, Y:2*Y,     :X]
+    q1 = a[:, :, 2*Y:3*Y,   :X]
+    p1 = a[:, :, 3*Y:,      :X]
+
+    m2 = a[:, :, :Y,     X:2*X]
+    n2 = a[:, :, Y:2*Y,  X:2*X]
+    q2 = a[:, :, 2*Y:3*Y,X:2*X]
+    p2 = a[:, :, 3*Y:,   X:2*X]
+
+    m3 = a[:, :, :Y,     2*X:3*X]
+    n3 = a[:, :, Y:2*Y,  2*X:3*X]
+    q3 = a[:, :, 2*Y:3*Y,2*X:3*X]
+    p3 = a[:, :, 3*Y:,   2*X:3*X]
+
+    m4 = a[:, :, :Y,        3*X:]
+    n4 = a[:, :, Y:2*Y,     3*X:]
+    q4 = a[:, :, 2*Y:3*Y,   3*X:]
+    p4 = a[:, :, 3*Y:,      3*X:]
+    a = torch.cat([m1, n1, p1, q1, m2, n2, p2, q2, m3, n3, p3, q3, m4, n4, p4, q4])
+
+    return a
+
 
 class DomainNorm2d(nn.Module):
     def __init__(self, dim):
