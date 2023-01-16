@@ -1,7 +1,7 @@
 from models.sync_batchnorm import DataParallelWithCallback
 import models.generator as generators
 import models.discriminator2 as discriminators2
-from models.discriminator2 import stack
+from models.discriminator2 import stack, stack_16
 import models.discriminator as discriminators
 import os
 import copy
@@ -258,21 +258,21 @@ class Unpaired_model(nn.Module):
             del realism_maps
 
 
-            labellist = stack(label)
-            fakelist = stack(fake)
-            img2list = stack(image2)
+            # labellist = stack_16(label)
+            fakelist = stack_16(fake)
+            img2list = stack_16(image2)
 
-            countlist = []
-            for i in range(len(labellist)):
-                lbl_cut = labellist[i]
-                map = torch.argmax(lbl_cut, dim=0)
-                count = len(torch.unique(map))
-                countlist.append(count)
+            # countlist = []
+            # for i in range(len(labellist)):
+            #     lbl_cut = labellist[i]
+            #     map = torch.argmax(lbl_cut, dim=0)
+            #     count = len(torch.unique(map))
+            #     countlist.append(count)
 
             for i in range(len(fakelist)):
 
                 loss_G_lpips, _ = tee_loss(loss_G_lpips,
-                                                 countlist[i] * vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
+                                                  vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
 
             # loss_G_lpips, _ = tee_loss(loss_G_lpips,
             #                                  vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
