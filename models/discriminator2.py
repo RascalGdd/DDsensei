@@ -347,8 +347,9 @@ class PerceptualDiscEnsemble(DiscriminatorEnsemble):
             # print(xs[-1][0].shape)
             # assert xs[-1][0].shape[0] == 1
             xi = getattr(vgg, f'relu_{i}')(xs[-1][0])
-            # print(xi.shape)
+            print(xi.shape)
             xs.append((xi.detach() if fix_input else xi, None))
+        asd
         # print(xi.shape)
 
         # if self._log.isEnabledFor(logging.DEBUG):
