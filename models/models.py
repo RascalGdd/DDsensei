@@ -259,8 +259,8 @@ class Unpaired_model(nn.Module):
 
 
             # labellist = stack_16(label)
-            fakelist = stack(fake)
-            img2list = stack(image2)
+            fakelist = stack_16(fake)
+            img2list = stack_16(image2)
 
             # countlist = []
             # for i in range(len(labellist)):

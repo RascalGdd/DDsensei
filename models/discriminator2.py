@@ -324,7 +324,7 @@ class PerceptualDiscEnsemble(DiscriminatorEnsemble):
 
     def prepare_input(self, *, vgg, img, fix_input, run_discs, **kwargs):
         """ Applies a VGG to img and returns feature maps from relu layers. """
-        img = stack_16(img)
+        img = stack(img)
 
         if self._log.isEnabledFor(logging.DEBUG):
             self._log.debug(f'PDE:prepare(i:{img.shape}, fix:{fix_input}, run:{run_discs}, other: {kwargs})')
