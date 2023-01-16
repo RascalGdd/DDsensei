@@ -263,8 +263,8 @@ class Unpaired_model(nn.Module):
             first = labellist[0]
             second = labellist[1]
             print(first.shape)
-            map = torch.argmax(first, dim=1)
-            map2 = torch.argmax(second, dim=1)
+            map = torch.argmax(first, dim=0)
+            map2 = torch.argmax(second, dim=0)
             count1 = len(torch.unique(map))
             print(torch.unique(map))
             count2 = len(torch.unique(map2))
