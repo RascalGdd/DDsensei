@@ -274,10 +274,7 @@ class Unpaired_model(nn.Module):
                 countlist_tmp.append(count)
 
             for j in countlist_tmp:
-                countlist.append((4 * j) / count_total)
-            print(countlist)
-            asd
-
+                countlist.append((8 * j) / count_total)
 
 
             for i in range(len(fakelist)):
