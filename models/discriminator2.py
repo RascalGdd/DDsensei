@@ -221,6 +221,8 @@ class ProjectionDiscriminator(nn.Module):
         x = self.model(x)
 
         _, c, h, w = x.shape
+        print(y)
+        asd
 
         if y is not None:
             if y.dtype == torch.int64:
