@@ -135,8 +135,6 @@ class DiscriminatorEnsemble(nn.Module):
 
         assert len(run_discs) == len(self.discs)
         x = self.prepare_input(fix_input=fix_input, run_discs=run_discs, **x)
-        print([di if rd else None for xi, rd, di in zip(x, run_discs, self.discs)])
-        asd
         return [di(xi) if rd else None for xi, rd, di in zip(x, run_discs, self.discs)]
 
     def __len__(self):
