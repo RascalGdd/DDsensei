@@ -281,29 +281,29 @@ class Unpaired_model(nn.Module):
             del realism_maps
 
 
-            labellist = stack(label)
+            # labellist = stack(label)
             fakelist = stack(fake)
             img2list = stack(image2)
 
 
-            countlist_tmp = []
-            countlist = []
-            count_total = 0
-            for i in range(len(labellist)):
-                lbl_cut = labellist[i]
-                map = torch.argmax(lbl_cut, dim=0)
-                count = len(torch.unique(map))
-                count_total += count
-                countlist_tmp.append(count)
-
-            for j in countlist_tmp:
-                countlist.append((8 * j) / count_total)
+            # countlist_tmp = []
+            # countlist = []
+            # count_total = 0
+            # for i in range(len(labellist)):
+            #     lbl_cut = labellist[i]
+            #     map = torch.argmax(lbl_cut, dim=0)
+            #     count = len(torch.unique(map))
+            #     count_total += count
+            #     countlist_tmp.append(count)
+            #
+            # for j in countlist_tmp:
+            #     countlist.append((8 * j) / count_total)
 
 
             for i in range(len(fakelist)):
 
                 loss_G_lpips, _ = tee_loss(loss_G_lpips,
-                                                  countlist[i] * vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
+                                                  vgg_weight * vgg_loss.forward_fake(fakelist[i], img2list[i])[0])
 
             # loss_G_lpips, _ = tee_loss(loss_G_lpips,
             #                                  vgg_weight * vgg_loss.forward_fake(fake, image2)[0])
