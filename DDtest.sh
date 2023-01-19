@@ -1,8 +1,8 @@
 #!/bin/bash -l
 
 #Slurm parameters
-#SBATCH --job-name=PEstackKVD
-#SBATCH --output=PEstackKVD.out
+#SBATCH --job-name=lpipsKVD
+#SBATCH --output=lpipsKVD.out
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
 #SBATCH --time=6-23:00:00
@@ -19,7 +19,7 @@ conda activate myenv
 
 # Run your python code
 # For single GPU use this
-CUDA_VISIBLE_DEVICES=0 python test_kvd.py  --name PEstack  --dataset_mode gtavtocityscapes --gpu_ids 0 \
+CUDA_VISIBLE_DEVICES=0 python test_kvd.py  --name lpips_mapi  --dataset_mode gtavtocityscapes --gpu_ids 0 \
 --dataroot /data/public/cityscapes  \
 --batch_size 2 --model_supervision 0  \
 --netG 9 --channels_G 16 --kvd --no_EMA
