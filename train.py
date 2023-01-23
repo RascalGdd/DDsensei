@@ -26,7 +26,7 @@ dataloader, dataloader_supervised, dataloader_val = dataloaders.get_dataloaders(
 im_saver = utils.image_saver(opt)
 fid_computer = fid_pytorch(opt, dataloader_val)
 miou_computer = miou_pytorch(opt,dataloader_val)
-kid = KernelInceptionDistance(subset_size=2, reset_real_features=False).cuda()
+kid = KernelInceptionDistance(subset_size=200, reset_real_features=False).cuda()
 a, b = [], []
 
 if opt.crop:
@@ -251,8 +251,8 @@ for epoch in range(start_epoch, opt.num_epochs):
                         generated = model.module.netG(label, edges=edges)
                     else:
                         generated = model.module.netEMA(label, edges=edges)
-                    generated = ((generated + 1)*50).type(torch.uint8)
-                    image = ((image + 1)*50).type(torch.uint8)
+                    generated = ((generated + 1)*127.5).type(torch.uint8)
+                    image = ((image + 1)*127.5).type(torch.uint8)
                     # generated = torch.nn.functional.interpolate(generated,scale_factor= 0.5, mode='nearest')
                     kid.update(image, real=True)
                     kid.update(generated, real=False)
