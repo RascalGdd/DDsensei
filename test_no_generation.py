@@ -77,11 +77,11 @@ miou = drn_105_d_miou(results_dir, name, ckpt_iter)
 print("MIOU =", miou)
 
 for i, image in enumerate(city_loader):
-    image = (image * 255).type(torch.uint8)
+    image = (image * 255).type(torch.uint8).cuda()
     kid.update(image, real=True)
 
 for i, generated in enumerate(gta_loader):
-    generated = (generated * 255).type(torch.uint8)
+    generated = (generated * 255).type(torch.uint8).cuda()
     kid.update(generated, real=False)
 
 kid_mean, kid_std = kid.compute()
