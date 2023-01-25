@@ -14,11 +14,11 @@ from utils.fid_scores import fid_pytorch_test
 
 kid = KernelInceptionDistance(subset_size=500, reset_real_features=False).cuda()
 
-path_fake = r"/no_backups/s1422/OASIS/results/end2end/best/image"
+path_fake = r"/no_backups/s1422/vsait/checkpoints/vsait/best/image"
 path_real = r"/data/public/cityscapes/leftImg8bit/val"
 
-results_dir = r"/no_backups/s1422/OASIS/results"
-name = r"end2end"
+results_dir = r"/no_backups/s1422/vsait/checkpoints"
+name = r"vsait"
 ckpt_iter = r"best"
 
 
