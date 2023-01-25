@@ -204,9 +204,7 @@ class MIoUDataset(torch.utils.data.Dataset):
 
         if self.label_list is not None:
             input_label = Image.open(self.label_list[index]).resize([512, 256], resample=Image.Resampling.NEAREST)
-            print(input_label.size)
-            asd
-            input_label = np.array(input_label)[:, :, 0]
+            input_label = np.array(input_label)[:, :]
 
             label_copy =  np.empty(input_label.shape, dtype=np.uint8)
             for label_tuple in labels:
