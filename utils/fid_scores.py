@@ -206,6 +206,7 @@ class fid_pytorch_test():
         self.model_inc.eval()
         with torch.no_grad():
             for i, generated in enumerate(self.gta_val):
+                generated = generated.cuda()
                 #generated = torch.nn.functional.interpolate(generated,scale_factor= 0.5, mode='nearest')
                 pool_val = self.model_inc(generated.float())[0][:, :, 0, 0]
                 pool += [pool_val]
