@@ -151,16 +151,14 @@ class GTAVToCityscapesDataset(torch.utils.data.Dataset):
                     for item in sorted(os.listdir(cur_folder)):
                         images.append(os.path.join(city_folder, item))
 
-                path_lab = os.path.join(self.opt.dataroot, "gtFine", mode)
-                for city_folder in sorted(os.listdir(path_lab)):
-                    cur_folder = os.path.join(path_lab, city_folder)
-                    for item in sorted(os.listdir(cur_folder)):
-                        if item.find("labelIds") != -1:
-                            labels.append(os.path.join(city_folder, item))
-                assert len(images) == len(labels), "different len of images and labels %s - %s" % (len(images), len(labels))
-                for i in range(len(images)):
-                    assert images[i].replace("_leftImg8bit.png", "") == labels[i].replace("_gtFine_labelIds.png", ""), \
-                        '%s and %s are not matching' % (images[i], labels[i])
+                path_lab = os.path.join(gtav_dataroot_origin, 'labels')
+                for label_map in sorted(os.listdir(path_lab)):
+                    if label_map.find(".png") != -1 and int(label_map.split(".")[0]) > 20000:
+                        labels.append(label_map)
+                # assert len(images) == len(labels), "different len of images and labels %s - %s" % (len(images), len(labels))
+                # for i in range(len(images)):
+                #     assert images[i].replace("_leftImg8bit.png", "") == labels[i].replace("_gtFine_labelIds.png", ""), \
+                #         '%s and %s are not matching' % (images[i], labels[i])
 
         return images, labels, (path_img, path_lab)
 

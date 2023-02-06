@@ -194,6 +194,8 @@ class MIoUDataset(torch.utils.data.Dataset):
         info = json.load(open(join(data_dir, 'info.json'), 'r'))
         normalize = transforms.Normalize(mean=info['mean'],
                                          std=info['std'])
+        # normalize = transforms.Normalize(mean=[0.5, 0.5, 0.5],
+        #                                  std=[0.5, 0.5, 0.5])
         self.transforms = transforms.Compose([
                 transforms.ToTensor(), normalize])
         self.to_tensor = transforms.ToTensor()
