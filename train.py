@@ -47,7 +47,7 @@ optimizerD = torch.optim.Adam(model.module.netD.parameters(), lr=0.0001,betas=(0
 # optimizerD_ori = torch.optim.Adam(model.module.netD_ori.parameters(), lr=opt.lr_d, betas=(opt.beta1, opt.beta2))
 optimizerDu = torch.optim.Adam(model.module.netDu.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 # optimizerDe = torch.optim.Adam(model.module.wavelet_decoder.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
-
+optimizerDu_2 = torch.optim.Adam(model.module.netDu_2.parameters(), lr=5*opt.lr_d, betas=(opt.beta1, opt.beta2))
 #Scheduler
 scheduler = StepLR(optimizerD, step_size=100000, gamma=0.5)
 
@@ -122,6 +122,16 @@ for epoch in range(start_epoch, opt.num_epochs):
         optimizerDu.step()
 
 
+        model.module.netDu_2.zero_grad()
+        # model.module.wavelet_decoder.zero_grad()
+        loss_Du, losses_Du_list = model(image, label, "losses_Du_usis_2", losses_computer)
+        loss_Du, losses_Du_list = opt.reg_every * loss_Du.mean(), [loss.mean() if loss is not None else None for
+                                                                   loss in losses_Du_list]
+        loss_Du.backward()
+        # optimizerDe.step()
+        optimizerDu_2.step()
+
+
         # if True:
         #     utils.save_networks(opt, cur_iter, model, latest=True)
         # if True:
@@ -150,21 +160,37 @@ for epoch in range(start_epoch, opt.num_epochs):
         else:
             loss_reg, losses_reg_list = torch.zeros((1)), [torch.zeros((1))]
 
+        if i % opt.reg_every == 0:
+            model.module.netDu_2.zero_grad()
+            loss_reg, losses_reg_list = model(image, label, "Du_regulaize_2", losses_computer)
+            loss_reg, losses_reg_list = loss_reg.mean(), [loss.mean() if loss is not None else None for loss in
+                                                          losses_reg_list]
+            loss_reg.backward()
+            optimizerDu_2.step()
+        else:
+            loss_reg, losses_reg_list = torch.zeros((1)), [torch.zeros((1))]
+
 
 
         # else:
 
 
         #--- generator unconditional update ---#
-        model.module.netG.zero_grad()
-        loss_G, losses_G_list = model(image, label, "losses_G", losses_computer,image2)
-        loss_G, losses_G_list = loss_G, [loss for loss in losses_G_list]
-        loss_G.backward()
-        optimizerG.step()
+        # model.module.netG.zero_grad()
+        # loss_G, losses_G_list = model(image, label, "losses_G", losses_computer,image2)
+        # loss_G, losses_G_list = loss_G, [loss for loss in losses_G_list]
+        # loss_G.backward()
+        # optimizerG.step()
 
 
         model.module.netG.zero_grad()
         loss_G_ori = model(image, label, "losses_G_ori2", losses_computer,image2)
+        loss_G_ori = loss_G_ori.mean()
+        loss_G_ori.backward()
+        optimizerG.step()
+
+        model.module.netG.zero_grad()
+        loss_G_ori = model(image, label, "losses_G_ori2_2", losses_computer,image2)
         loss_G_ori = loss_G_ori.mean()
         loss_G_ori.backward()
         optimizerG.step()
@@ -184,12 +210,12 @@ for epoch in range(start_epoch, opt.num_epochs):
 
 
         #--- discriminator update ---#
-        model.module.netD.zero_grad()
-        loss_D, losses_D_list = model(image, label, "losses_D", losses_computer, image2)
-        loss_D, losses_D_list = loss_D, [loss for loss in losses_D_list]
-        loss_D.backward()
-        torch.nn.utils.clip_grad_norm_(model.module.netD.parameters(), 1000.)
-        optimizerD.step()
+        # model.module.netD.zero_grad()
+        # loss_D, losses_D_list = model(image, label, "losses_D", losses_computer, image2)
+        # loss_D, losses_D_list = loss_D, [loss for loss in losses_D_list]
+        # loss_D.backward()
+        # torch.nn.utils.clip_grad_norm_(model.module.netD.parameters(), 1000.)
+        # optimizerD.step()
 
         # model.module.netD_ori.zero_grad()
         # loss_D_ori, losses_D_list_ori = model(image, label, "losses_D_ori", losses_computer)
@@ -214,10 +240,10 @@ for epoch in range(start_epoch, opt.num_epochs):
         #     lpips_loss = model(image2, label, "LPIPS", losses_computer)
         #     lpips_loss.backward()
         #     optimizerG.step()
-        model.module.netD.zero_grad()
-        loss_D_reg, _ = model(image, label, "losses_D_reg", losses_computer, image2)
-        loss_D_reg.backward()
-        optimizerD.step()
+        # model.module.netD.zero_grad()
+        # loss_D_reg, _ = model(image, label, "losses_D_reg", losses_computer, image2)
+        # loss_D_reg.backward()
+        # optimizerD.step()
 
 
         # --- unconditional discriminator regulaize ---#
